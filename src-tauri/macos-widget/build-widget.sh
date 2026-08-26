@@ -14,6 +14,19 @@ HOST_ENTS="$SCRIPT_DIR/App.entitlements"
 EXT_ENTS="$SCRIPT_DIR/TauriWidgetExtension.entitlements"
 IDENTITY="${WIDGET_SIGN_IDENTITY:-${APPLE_SIGNING_IDENTITY:--}}"
 
+# The npm package currently publishes its Swift sources without its declared
+# test directory. Stage only the runtime target so SwiftPM resolution remains
+# deterministic on developer machines and GitHub-hosted macOS runners.
+PLUGIN_SWIFT="$SCRIPT_DIR/../../node_modules/tauri-plugin-widgets-api/swift/Sources/TauriWidgets"
+VENDORED_SWIFT="$SCRIPT_DIR/vendor/TauriWidgets/Sources/TauriWidgets"
+if [[ ! -d "$PLUGIN_SWIFT" ]]; then
+  echo "ERROR: WidgetKit runtime sources not found at $PLUGIN_SWIFT" >&2
+  exit 1
+fi
+rm -rf "$VENDORED_SWIFT"
+mkdir -p "$VENDORED_SWIFT"
+cp -R "$PLUGIN_SWIFT"/. "$VENDORED_SWIFT"/
+
 # ─── Regenerate entitlements from plugins.widgets.appGroup ───────────────────
 # Single source of truth in tauri.conf.json — avoids host/extension drift.
 
@@ -115,6 +128,7 @@ fi
 
 # Strip accidental nested Frameworks (SwiftPM copy) — host app should not ship them twice.
 rm -rf "$APPEX_PATH/Contents/Frameworks"
+xattr -cr "$APPEX_PATH"
 
 # ─── Sign .appex with WidgetKit entitlements ─────────────────────────────────
 

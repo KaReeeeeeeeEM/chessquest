@@ -7,7 +7,7 @@ options:
 
 packages:
   TauriWidgets:
-    path: /Users/kareem/Documents/ChatGPT/Chess Interactive club/node_modules/tauri-plugin-widgets-api/swift
+    path: vendor/TauriWidgets
 
 targets:
   TauriWidgetExtension:
