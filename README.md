@@ -68,13 +68,13 @@ ChessQuest does not send book content to a generative model. EPUB processing, pr
 
 ## Download
 
-The current release supports Apple-silicon Macs.
+The current release supports macOS, Windows, and Linux.
 
-**[Download ChessQuest 0.1.0 for macOS](https://github.com/KaReeeeeeeeEM/chessquest/releases/latest/download/ChessQuest_0.1.0_aarch64.dmg)**
+**[Download the recommended ChessQuest installer](http://reelma.me/chessquest/downloads.html)**
 
 The immutable artifact and release notes are also available from [GitHub Releases](https://github.com/KaReeeeeeeeEM/chessquest/releases).
 
-> ChessQuest is currently distributed directly and is not notarized through the Mac App Store. macOS may ask you to confirm that you want to open an application downloaded from the internet.
+> ChessQuest is currently distributed directly. macOS and Windows may ask you to confirm that you want to open an application downloaded from the internet.
 
 ## Privacy and data
 
@@ -93,7 +93,7 @@ Removing the application does not necessarily clear WebView application data. Us
 
 | Layer | Technology | Purpose |
 | --- | --- | --- |
-| Desktop | Tauri 2 + Rust | Native macOS packaging and notifications |
+| Desktop | Tauri 2 + Rust | Native macOS, Windows, and Linux packaging and notifications |
 | Interface | React 19 + TypeScript | Typed application state and UI |
 | Build | Vite | Development and production bundling |
 | Chess | chess.js | Legal moves, board state, and game rules |
@@ -181,7 +181,7 @@ The public website source lives in [`website/`](website/) and deploys from this 
 
 ## Current limitations
 
-- The published build targets Apple silicon only.
+- Published releases provide macOS universal, Windows x64, and Linux x64 installers.
 - Widget selection changes the in-app Today widget. A native macOS Notification Center widget requires a separately signed WidgetKit extension.
 - Match review is deterministic and rule-based rather than powered by a full-strength external engine.
 - Elo after one calibration game is provisional, not an official rating.

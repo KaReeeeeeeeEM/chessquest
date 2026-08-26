@@ -1,0 +1,94 @@
+name: Release desktop applications
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build ${{ matrix.label }}
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            label: macOS universal
+            args: --target universal-apple-darwin
+            rust_targets: aarch64-apple-darwin,x86_64-apple-darwin
+          - platform: windows-latest
+            label: Windows x64
+            args: ""
+            rust_targets: ""
+          - platform: ubuntu-22.04
+            label: Linux x64
+            args: ""
+            rust_targets: ""
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux packaging dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf xdg-utils
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.rust_targets }}
+
+      - name: Cache Rust build output
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: ./src-tauri -> target
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Verify application
+        run: npm run typecheck && npx vitest run && npm run build
+
+      - name: Build and upload native installers
+        uses: tauri-apps/tauri-action@v0.6.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: v__VERSION__
+          releaseName: ChessQuest __VERSION__
+          releaseBody: |
+            Cross-platform ChessQuest release for macOS, Windows, and Linux.
+
+            Choose the installer for your operating system from the assets below.
+          releaseDraft: true
+          prerelease: false
+          retryAttempts: 2
+          args: ${{ matrix.args }}
+
+  publish:
+    name: Publish verified release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish release as latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          gh release edit "v${version}" --repo "${{ github.repository }}" --draft=false --latest
