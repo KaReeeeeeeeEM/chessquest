@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, Download, LoaderCircle, TriangleAlert } from "lucide-react";
+import { ArrowRight, CheckCircle2, Download, LoaderCircle, ShieldCheck, TriangleAlert } from "lucide-react";
 import { check, type Update } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
 import { Button } from "@/components/ui/button";
@@ -75,7 +75,7 @@ export function AppUpdater() {
   }
 
   const busy = status === "checking" || status === "downloading" || status === "restarting";
-  const title = status === "available" ? message : status === "current" ? "ChessQuest is up to date" : status === "checking" ? "Checking for updates…" : status === "downloading" ? `Downloading update · ${progress}%` : status === "restarting" ? "Update installed" : status === "unsupported" ? "Desktop updater" : "Update could not be completed";
+  const title = status === "available" ? "A new version is ready." : status === "current" ? "ChessQuest is up to date" : status === "checking" ? "Checking for updates…" : status === "downloading" ? `Downloading update · ${progress}%` : status === "restarting" ? "Update installed" : status === "unsupported" ? "Desktop updater" : "Update could not be completed";
 
   return <div className="app-updater">
     <button className="update-button" onClick={() => void checkForUpdate(true)} disabled={busy}>
@@ -85,17 +85,26 @@ export function AppUpdater() {
     <Dialog open={modalOpen} onOpenChange={(open) => { if (!busy) setModalOpen(open); }}>
       <DialogContent className="update-dialog" showCloseButton={!busy}>
         <DialogHeader>
-          <span className="update-dialog-icon" aria-hidden="true">{status === "available" ? <Download /> : status === "current" ? <CheckCircle2 /> : status === "error" || status === "unsupported" ? <TriangleAlert /> : <LoaderCircle className="spin" />}</span>
+          <div className="update-dialog-kicker"><span className="update-dialog-icon" aria-hidden="true">{status === "available" ? <Download /> : status === "current" ? <CheckCircle2 /> : status === "error" || status === "unsupported" ? <TriangleAlert /> : <LoaderCircle className="spin" />}</span><span>ChessQuest update</span></div>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{status === "available" ? "Download the signed update, install it, and restart ChessQuest without leaving the application." : status === "downloading" ? "Keep ChessQuest open while the signed package downloads." : message}</DialogDescription>
+          <DialogDescription>{status === "available" ? "A polished new version is ready for your library and games." : status === "downloading" ? "Keep ChessQuest open while the signed package downloads." : message}</DialogDescription>
         </DialogHeader>
+        {status === "available" && update && <>
+          <div className="update-version-route" aria-label={`Updating from ${update.currentVersion} to ${update.version}`}>
+            <div><span>Installed</span><strong>{update.currentVersion}</strong></div>
+            <ArrowRight aria-hidden="true" />
+            <div><span>Ready</span><strong>{update.version}</strong></div>
+          </div>
+          {update.body && <section className="update-release-notes"><span>What’s new</span><p>{update.body}</p></section>}
+        </>}
         {(status === "downloading" || status === "restarting") && <div className="update-download-progress">
           <div className="update-progress-copy"><span>{status === "restarting" ? "Installed" : "Downloading"}</span><strong>{progress}%</strong></div>
           <div className="update-progress" role="progressbar" aria-label="Update download progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><i style={{ width: `${progress}%` }} /></div>
         </div>}
         <DialogFooter>
-          {status === "available" && <Button onClick={() => void installUpdate()}><Download /> Download, install and restart</Button>}
-          {(status === "current" || status === "error" || status === "unsupported") && <Button variant="outline" onClick={() => setModalOpen(false)}>Close</Button>}
+          {status === "available" && <Button className="update-primary-action" onClick={() => void installUpdate()}><Download /> Download, install and restart</Button>}
+          {(status === "current" || status === "error" || status === "unsupported") && <Button className="update-secondary-action" variant="outline" onClick={() => setModalOpen(false)}>Close</Button>}
+          {(status === "available" || status === "downloading" || status === "restarting") && <small className="update-security"><ShieldCheck aria-hidden="true" /> Signed and verified before installation</small>}
         </DialogFooter>
       </DialogContent>
     </Dialog>

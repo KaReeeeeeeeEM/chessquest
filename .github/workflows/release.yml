@@ -70,7 +70,7 @@ jobs:
           tagName: v__VERSION__
           releaseName: ChessQuest __VERSION__
           releaseBody: |
-            ChessQuest 0.5.1 replaces the cramped sidebar updater with an automatic, responsive update modal. It displays real signed-package download progress, installs the update, and restarts the desktop application when complete. Tablet layouts now use the same focused one-panel navigation model as mobile.
+            ChessQuest 0.5.2 gives the automatic updater a refined Litera-inspired appearance: a calm editorial sheet, clear installed-to-ready version comparison, readable release notes, signed-package reassurance, and polished download progress while preserving automatic installation and restart.
 
             The downloads website now vertically centers its download chevron and uses concise operating-system labels inside each version menu.
 
