@@ -83,7 +83,7 @@ export function AppUpdater() {
       <span>Check update</span>
     </button>
     <Dialog open={modalOpen} onOpenChange={(open) => { if (!busy) setModalOpen(open); }}>
-      <DialogContent className="update-dialog" showCloseButton={!busy}>
+      <DialogContent className="update-dialog" showCloseButton={false}>
         <DialogHeader>
           <div className="update-dialog-kicker"><span className="update-dialog-icon" aria-hidden="true">{status === "available" ? <Download /> : status === "current" ? <CheckCircle2 /> : status === "error" || status === "unsupported" ? <TriangleAlert /> : <LoaderCircle className="spin" />}</span><span>ChessQuest update</span></div>
           <DialogTitle>{title}</DialogTitle>

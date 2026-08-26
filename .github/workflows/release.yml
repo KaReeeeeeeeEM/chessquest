@@ -70,7 +70,7 @@ jobs:
           tagName: v__VERSION__
           releaseName: ChessQuest __VERSION__
           releaseBody: |
-            ChessQuest 0.5.2 gives the automatic updater a refined Litera-inspired appearance: a calm editorial sheet, clear installed-to-ready version comparison, readable release notes, signed-package reassurance, and polished download progress while preserving automatic installation and restart.
+            ChessQuest 0.5.3 gives the automatic updater a refined Litera-inspired appearance with one clear Close button, a calm editorial sheet, installed-to-ready version comparison, readable release notes, signed-package reassurance, and polished download progress.
 
             The downloads website now vertically centers its download chevron and uses concise operating-system labels inside each version menu.
 
