@@ -1,6 +1,6 @@
 [package]
 name = "chessquest"
-version = "0.6.3"
+version = "0.7.0"
 description = "An interactive, local-first chess book learning application"
 authors = ["Chess Interactive Club"]
 license = ""
@@ -25,6 +25,7 @@ tauri = { version = "2.11.3", features = [] }
 tauri-plugin-log = "2"
 tauri-plugin-notification = "2"
 tauri-plugin-process = "2"
+tauri-plugin-widgets = "0.5"
 
 [target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
 tauri-plugin-updater = "2"

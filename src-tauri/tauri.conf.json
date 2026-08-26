@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "ChessQuest",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "identifier": "com.chessquest.club",
   "build": {
     "frontendDist": "../dist",
@@ -37,7 +37,11 @@
       "icons/icon.ico"
     ],
     "macOS": {
-      "signingIdentity": "-"
+      "signingIdentity": "-",
+      "entitlements": "./macos-widget/App.entitlements",
+      "files": {
+        "PlugIns/TauriWidgetExtension.appex": "./macos-widget/build/Build/Products/Release/TauriWidgetExtension.appex"
+      }
     },
     "android": {
       "debugApplicationIdSuffix": ".debug",
@@ -53,6 +57,11 @@
       "windows": {
         "installMode": "passive"
       }
+    },
+    "widgets": {
+      "appGroup": "group.com.chessquest.club",
+      "transport": "widgetContainer",
+      "extensionBundleId": "com.chessquest.club.widgetkit"
     }
   }
 }

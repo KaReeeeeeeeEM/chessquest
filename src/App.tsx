@@ -37,6 +37,7 @@ import { tipForDay } from "./features/tips/tips";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BookImporter } from "./features/library/BookImporter";
 import { AppUpdater } from "./features/update/AppUpdater";
+import { makeNativeWidgetAvailable, openDesktopWidget, syncNativeWidget } from "./features/widgets/nativeWidgets";
 import {
   loadImportedBooks,
   saveImportedBooks,
@@ -558,6 +559,11 @@ export default function App() {
     (total, pages) => total + pages,
     0,
   );
+  useEffect(() => {
+    void syncNativeWidget({ choice: widgetChoice, streak, pagesToday }).catch(() => {
+      // Web previews and platforms without a configured widget host stay in-app only.
+    });
+  }, [pagesToday, streak, widgetChoice]);
   const recommendedDifficulty: Difficulty =
     totalPagesRead === 0 && localStorage.getItem("cq-preferred-level")
       ? localStorage.getItem("cq-preferred-level") as Difficulty
@@ -1148,10 +1154,24 @@ function WidgetPreview({ id, streak, pagesToday, compact = false }: { id: string
 function WidgetGallery({ selected, onSelect, streak, pagesToday }: { selected: string; onSelect: (value: string) => void; streak: number; pagesToday: number }) {
   const initial = Math.max(0, widgetOptions.findIndex((item) => item.id === selected));
   const [index, setIndex] = useState(initial);
+  const [nativeStatus, setNativeStatus] = useState<"idle" | "syncing" | "ready" | "web" | "error">("idle");
   const option = widgetOptions[index];
   function move(direction: number) { setIndex((value) => (value + direction + widgetOptions.length) % widgetOptions.length); }
+  async function addToDevice() {
+    setNativeStatus("syncing");
+    try {
+      onSelect(option.id);
+      const desktopFallback = /Win|Linux/i.test(navigator.platform);
+      const result = desktopFallback
+        ? await openDesktopWidget({ choice: option.id, streak, pagesToday }).then(() => ({ available: true }))
+        : await makeNativeWidgetAvailable({ choice: option.id, streak, pagesToday });
+      setNativeStatus(result.available ? "ready" : "web");
+    } catch {
+      setNativeStatus("error");
+    }
+  }
   return <div className="widget-gallery mount">
-    <section className="widget-gallery-copy"><span className="eyebrow">WIDGET GALLERY</span><h2>Keep chess within sight</h2><p>Choose the glanceable ChessQuest card shown on Today. Preview every type and size before applying it.</p><div className="widget-size-pill">{option.size}</div><h3>{option.name}</h3><p>{option.size === "Small" ? "A single focused signal." : option.size === "Medium" ? "More context without taking over your day." : "Your reading and practice rhythm in one view."}</p><Button onClick={() => onSelect(option.id)}>{selected === option.id ? <Check /> : <LayoutGrid />}{selected === option.id ? "Selected" : "Use this widget"}</Button></section>
+    <section className="widget-gallery-copy"><span className="eyebrow">OS WIDGET GALLERY</span><h2>Keep chess within sight</h2><p>Choose the ChessQuest widget that appears in your device’s widget gallery. Real reading and streak data stays synchronized from this app.</p><div className="widget-size-pill">{option.size}</div><h3>{option.name}</h3><p>{option.size === "Small" ? "A single focused signal." : option.size === "Medium" ? "More context without taking over your day." : "Your reading and practice rhythm in one view."}</p><div className="widget-install-actions"><Button variant="outline" onClick={() => onSelect(option.id)}>{selected === option.id ? <Check /> : <LayoutGrid />}{selected === option.id ? "Selected in ChessQuest" : "Use in ChessQuest"}</Button><Button onClick={() => void addToDevice()} disabled={nativeStatus === "syncing"}><LayoutGrid />{nativeStatus === "syncing" ? "Preparing widget…" : "Add to device widgets"}</Button></div>{nativeStatus !== "idle" && <p className={`widget-native-status widget-native-status--${nativeStatus}`} role="status">{nativeStatus === "ready" ? "Widget data is ready. On macOS, open Edit Widgets and choose ChessQuest. Android will offer to pin it when supported; Windows and Linux open a persistent desktop widget." : nativeStatus === "web" ? "Install the ChessQuest app first to add an operating-system widget." : nativeStatus === "error" ? "The device widget could not be prepared. Check the installed app permissions and try again." : "Preparing the native widget…"}</p>}</section>
     <section className="widget-carousel" aria-roledescription="carousel" aria-label="Widget previews">
       <div className="widget-device"><div className="widget-device-time">9:41</div><WidgetPreview key={option.id} id={option.id} streak={streak} pagesToday={pagesToday} /></div>
       <div className="widget-carousel-controls"><button aria-label="Previous widget" onClick={() => move(-1)}><ChevronLeft /></button><div>{widgetOptions.map((item, dot) => <button key={item.id} aria-label={`Show ${item.name}`} aria-current={dot === index ? "true" : undefined} className={dot === index ? "active" : ""} onClick={() => setIndex(dot)} />)}</div><button aria-label="Next widget" onClick={() => move(1)}><ChevronRight /></button></div>
