@@ -70,7 +70,7 @@ jobs:
           tagName: v__VERSION__
           releaseName: ChessQuest __VERSION__
           releaseBody: |
-            This ChessQuest release makes practice feel more deliberate: Coach Rook now visibly thinks before replying, completed games replay on the board and pause at teachable decisions, and chess pieces are larger across phone, tablet, and desktop layouts.
+            This ChessQuest release turns imported EPUB pages into a responsive, book-like reading experience with genuine title and author details, running heads, comfortable typography, page folios, and subtle page-turn motion. Imported titles also receive a designed cover in the library.
 
             Desktop users can check for future signed updates from the bottom of the sidebar and install them without repeatedly downloading a full installer manually.
 

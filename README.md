@@ -32,6 +32,7 @@ ChessQuest does not send book content to a generative model. EPUB processing, pr
 ### Reading that encourages momentum
 
 - Import EPUB chess books that you legally own.
+- Read them in a responsive book-like layout with genuine title, author, running heads, comfortable typography, and page folios.
 - Split genuine chapter text into readable local pages.
 - Track progress only when a real page is completed.
 - Offer another five pages at natural stopping points.

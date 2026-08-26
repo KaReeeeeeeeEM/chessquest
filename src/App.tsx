@@ -1207,7 +1207,9 @@ function LibraryView({
       {importedBooks.map((b) => (
         <article className="book-card card" key={b.id}>
           <div className="book-cover book-cover--imported">
-            <span>♞</span>
+            <span className="book-cover-mark" aria-hidden="true">♞</span>
+            <strong>{b.title}</strong>
+            <small>{b.author}</small>
           </div>
           <div>
             <span className="pill">Your imported book</span>
@@ -1238,6 +1240,23 @@ function LibraryView({
   );
 }
 
+function readingParagraphs(text: string) {
+  const sentences = text.match(/[^.!?]+(?:[.!?]+[”’"']?|$)/g)?.map((sentence) => sentence.trim()).filter(Boolean) || [text];
+  if (sentences.length < 3) return [text];
+  const paragraphs: string[] = [];
+  let paragraph = "";
+  for (const sentence of sentences) {
+    if (paragraph && paragraph.length + sentence.length > 430) {
+      paragraphs.push(paragraph);
+      paragraph = sentence;
+    } else {
+      paragraph = paragraph ? `${paragraph} ${sentence}` : sentence;
+    }
+  }
+  if (paragraph) paragraphs.push(paragraph);
+  return paragraphs;
+}
+
 function Reader({
   book,
   pagesRead,
@@ -1257,6 +1276,10 @@ function Reader({
   const [checkpoint, setCheckpoint] = useState<number | null>(null);
   const complete = pagesRead >= book.chapters.length;
   const page = book.chapters[pageIndex];
+  const titleParts = page.title.split(/\s+·\s+/);
+  const sectionTitle = titleParts[0];
+  const sectionPart = titleParts[1] || null;
+  const paragraphs = readingParagraphs(page.excerpt);
   const displayedProgress = Math.max(pagesRead, pageIndex);
   const percent = Math.min(
     100,
@@ -1340,11 +1363,25 @@ function Reader({
           <Progress value={percent} label={`${book.title} reading progress`} />
         </div>
       </header>
-      <section className="reader-sheet">
-        <span className="eyebrow">{book.title}</span>
-        <h2>{page.title}</h2>
-        <p>{page.excerpt}</p>
-      </section>
+      <div className="reader-book" key={page.id}>
+        <section className="reader-sheet">
+          <header className="reader-running-head">
+            <span>{book.title}</span>
+            <span>{book.author}</span>
+          </header>
+          <div className="reader-title-block">
+            <span className="eyebrow">{sectionPart ? `SECTION · ${sectionPart}` : "CURRENT SECTION"}</span>
+            <h2>{sectionTitle}</h2>
+            <div className="reader-ornament" aria-hidden="true"><i /><span>♞</span><i /></div>
+          </div>
+          <div className="reader-prose">
+            {paragraphs.map((paragraph, index) => <p key={`${page.id}-${index}`}>{paragraph}</p>)}
+          </div>
+          <footer className="reader-folio" aria-label={`Book page ${pageIndex + 1}`}>
+            <span>{pageIndex + 1}</span>
+          </footer>
+        </section>
+      </div>
       <footer className="reader-next">
         <span>This page counts only when you finish it.</span>
         <Button onClick={finishPage}>
