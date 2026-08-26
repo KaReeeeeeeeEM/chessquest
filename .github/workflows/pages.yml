@@ -28,10 +28,15 @@ jobs:
         uses: actions/checkout@v4
       - name: Configure Pages
         uses: actions/configure-pages@v5
+      - name: Assemble website artifact
+        run: |
+          mkdir _site
+          cp -R website/. _site/
+          cp public/chessquest-logo.png _site/chessquest-logo.png
       - name: Upload static website
         uses: actions/upload-pages-artifact@v3
         with:
-          path: website
+          path: _site
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

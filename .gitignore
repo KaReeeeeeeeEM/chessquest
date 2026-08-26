@@ -12,6 +12,7 @@ dist
 dist-ssr
 src-tauri/target
 .playwright-cli
+output/
 .vercel
 *.local
 
