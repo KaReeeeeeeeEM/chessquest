@@ -96,7 +96,7 @@ ChessQuest is local-first:
 - Native reminder permission is requested only when reminders are enabled.
 - No account is required for the current release.
 - Creating a Club Room challenge contacts Lichess and opens the game in the user’s browser; no book text is sent.
-- Desktop update checks are user-initiated from the sidebar; updates are signature-verified before installation.
+- Desktop updates are checked automatically on launch and can also be checked from the sidebar. Available versions open in a responsive modal with signed-package download progress, automatic installation, and application restart.
 
 Removing the application does not necessarily clear WebView application data. Use the application’s controls before uninstalling when data removal is important.
 

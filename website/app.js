@@ -38,7 +38,7 @@ function makeDownloadLink(asset, platform, className = "download-row-button") {
   link.className = className;
   link.href = asset.browser_download_url;
   link.setAttribute("aria-label", `Download ChessQuest for ${PLATFORM_DETAILS[platform].label}`);
-  link.append(`Download for ${PLATFORM_DETAILS[platform].label} `);
+  link.append(`For ${PLATFORM_DETAILS[platform].label}`);
   const icon = document.createElement("span");
   icon.setAttribute("aria-hidden", "true");
   icon.textContent = "↓";
