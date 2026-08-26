@@ -70,7 +70,7 @@ jobs:
           tagName: v__VERSION__
           releaseName: ChessQuest __VERSION__
           releaseBody: |
-            ChessQuest 0.6.2 introduces the fixed-proportion StPageFlip HTML reader and improves the updater’s primary installation action with a thicker, centered, responsive button and clearer interaction feedback.
+            ChessQuest 0.6.3 redesigns the updater as a compact, responsive sheet with a balanced header, restrained version and release-note sections, a sticky action area, and clear Install and Not now choices without a duplicate close icon.
 
             The downloads website now vertically centers its download chevron and uses concise operating-system labels inside each version menu.
 

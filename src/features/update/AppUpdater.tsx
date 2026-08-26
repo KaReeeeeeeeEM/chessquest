@@ -85,9 +85,14 @@ export function AppUpdater() {
     <Dialog open={modalOpen} onOpenChange={(open) => { if (!busy) setModalOpen(open); }}>
       <DialogContent className="update-dialog" showCloseButton={false}>
         <DialogHeader>
-          <div className="update-dialog-kicker"><span className="update-dialog-icon" aria-hidden="true">{status === "available" ? <Download /> : status === "current" ? <CheckCircle2 /> : status === "error" || status === "unsupported" ? <TriangleAlert /> : <LoaderCircle className="spin" />}</span><span>ChessQuest update</span></div>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{status === "available" ? "A polished new version is ready for your library and games." : status === "downloading" ? "Keep ChessQuest open while the signed package downloads." : message}</DialogDescription>
+          <div className="update-heading-row">
+            <span className="update-dialog-icon" aria-hidden="true">{status === "available" ? <Download /> : status === "current" ? <CheckCircle2 /> : status === "error" || status === "unsupported" ? <TriangleAlert /> : <LoaderCircle className="spin" />}</span>
+            <div className="update-heading-copy">
+              <span className="update-dialog-kicker">ChessQuest update</span>
+              <DialogTitle>{title}</DialogTitle>
+              <DialogDescription>{status === "available" ? "A polished new version is ready for your library and games." : status === "downloading" ? "Keep ChessQuest open while the signed package downloads." : message}</DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
         {status === "available" && update && <>
           <div className="update-version-route" aria-label={`Updating from ${update.currentVersion} to ${update.version}`}>
@@ -102,7 +107,7 @@ export function AppUpdater() {
           <div className="update-progress" role="progressbar" aria-label="Update download progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><i style={{ width: `${progress}%` }} /></div>
         </div>}
         <DialogFooter>
-          {status === "available" && <Button className="update-primary-action" onClick={() => void installUpdate()}><Download /> Download, install and restart</Button>}
+          {status === "available" && <div className="update-actions"><Button className="update-secondary-action" variant="outline" onClick={() => setModalOpen(false)}>Not now</Button><Button className="update-primary-action" onClick={() => void installUpdate()}><Download data-icon="inline-start" /> Download, install and restart</Button></div>}
           {(status === "current" || status === "error" || status === "unsupported") && <Button className="update-secondary-action" variant="outline" onClick={() => setModalOpen(false)}>Close</Button>}
           {(status === "available" || status === "downloading" || status === "restarting") && <small className="update-security"><ShieldCheck aria-hidden="true" /> Signed and verified before installation</small>}
         </DialogFooter>
