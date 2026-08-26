@@ -11,6 +11,25 @@ const PIECE_VALUE: Record<string, number> = {
   k: 0,
 };
 
+// Compact offline repertoire derived from established master opening families.
+const OPENING_LINES = [
+  ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6"],
+  ["e4", "c5", "Nf3", "d6", "d4", "cxd4"],
+  ["e4", "c6", "d4", "d5", "Nc3", "dxe4"],
+  ["e4", "e6", "d4", "d5", "Nc3", "Bb4"],
+  ["d4", "Nf6", "c4", "e6", "Nc3", "Bb4"],
+  ["d4", "d5", "c4", "e6", "Nc3", "Nf6"],
+  ["d4", "Nf6", "c4", "g6", "Nc3", "Bg7"],
+  ["c4", "e5", "Nc3", "Nf6", "g3", "d5"],
+  ["Nf3", "d5", "g3", "c5", "Bg2", "Nc6"],
+];
+
+function openingBookMove(game: Chess, history: string[]) {
+  const candidates = OPENING_LINES.filter((line) => history.every((move, index) => line[index] === move)).map((line) => line[history.length]).filter(Boolean);
+  const legal = candidates.filter((san) => game.moves().includes(san));
+  return legal[Math.floor(Math.random() * legal.length)];
+}
+
 export function evaluatePosition(game: Chess) {
   if (game.isCheckmate()) return game.turn() === "w" ? -100000 : 100000;
   if (game.isDraw()) return 0;
@@ -67,22 +86,32 @@ function search(game: Chess, depth: number, alpha: number, beta: number): number
   return best;
 }
 
-export function chooseComputerMove(game: Chess, difficulty: Difficulty) {
+export function chooseComputerMove(game: Chess, difficulty: Difficulty, avoidPositions: string[] = [], history: string[] = []) {
+  const bookMove = openingBookMove(game, history);
+  if (bookMove) return game.moves({ verbose: true }).find((move) => move.san === bookMove);
   const depth = difficulty === "expert" ? 3 : difficulty === "club" ? 2 : 1;
+  const maximizing = game.turn() === "w";
+  const normalizedAvoid = new Set(avoidPositions.map((fen) => fen.split(" ").slice(0, 4).join(" ")));
   const scored = game.moves({ verbose: true }).map((move) => {
     game.move(move);
-    const score = search(game, depth - 1, -Infinity, Infinity);
+    const repeated = normalizedAvoid.has(game.fen().split(" ").slice(0, 4).join(" "));
+    const score = search(game, depth - 1, -Infinity, Infinity) + (repeated ? (maximizing ? -500 : 500) : 0);
     game.undo();
     return { move, score };
   });
-  scored.sort((a, b) => a.score - b.score);
+  scored.sort((a, b) => maximizing ? b.score - a.score : a.score - b.score);
   const pool =
     difficulty === "beginner"
       ? scored.slice(0, Math.min(6, scored.length))
       : difficulty === "casual"
-        ? scored.slice(0, Math.min(3, scored.length))
-        : scored.slice(0, 1);
-  return pool[Math.floor(Math.random() * pool.length)]?.move;
+        ? scored.slice(0, Math.min(4, scored.length))
+        : difficulty === "club"
+          ? scored.slice(0, Math.min(2, scored.length))
+          : scored.slice(0, 1);
+  const weights = pool.map((_, index) => Math.max(1, pool.length - index));
+  const roll = Math.random() * weights.reduce((sum, weight) => sum + weight, 0);
+  let cursor = 0;
+  return pool.find((_, index) => (cursor += weights[index]) >= roll)?.move || pool[0]?.move;
 }
 
 export function reactionFor(move: Move, game: Chess, name: string) {

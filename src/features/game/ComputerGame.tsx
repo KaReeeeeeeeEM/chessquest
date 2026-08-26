@@ -106,13 +106,13 @@ export function ComputerGame({ name, recommended, sounds, onSound, onGameSaved, 
     return true;
   }
 
-  function computerTurn(position: Chess) {
+  function computerTurn(position: Chess, history = moveLog) {
     setThinking(true);
     setComment(mode === "watch" ? "Comparing candidate moves and checking the reply…" : `Give me a moment, ${name}. I’m checking your threats and my replies.`);
     if (thinkTimer.current) window.clearTimeout(thinkTimer.current);
     thinkTimer.current = window.setTimeout(() => {
       const next = new Chess(position.fen());
-      const choice = chooseComputerMove(next, difficulty);
+      const choice = chooseComputerMove(next, difficulty, history.flatMap((item) => [item.before, item.after]), history.map((item) => item.san));
       if (!choice) {
         setThinking(false);
         return;
@@ -137,7 +137,7 @@ export function ComputerGame({ name, recommended, sounds, onSound, onGameSaved, 
       soundFor(played, next);
       setGame(next);
       setComment(reactionFor(played, next, name));
-      if (!finishIfNeeded(next)) computerTurn(next);
+      if (!finishIfNeeded(next)) computerTurn(next, [...moveLog, played]);
     } catch {
       setComment("That move is not legal. Try another route.");
     }
@@ -231,7 +231,7 @@ export function ComputerGame({ name, recommended, sounds, onSound, onGameSaved, 
             <div className="game-board" role="grid" aria-label="Chess game against the computer">
               {game.board().flatMap((rank, row) => rank.map((piece, file) => {
                 const square = `${"abcdefgh"[file]}${8 - row}` as Square;
-                return <button key={square} role="gridcell" aria-label={square} className={`game-square ${(row + file) % 2 ? "game-square--dark" : "game-square--light"} ${selected === square ? "game-square--selected" : ""}`} onClick={() => select(square)}><span>{piece ? pieces[`${piece.color}${piece.type}`] : ""}</span></button>;
+                return <button key={square} role="gridcell" aria-label={square} data-file={row === 7 ? "abcdefgh"[file] : undefined} data-rank={file === 0 ? 8 - row : undefined} className={`game-square ${(row + file) % 2 ? "game-square--dark" : "game-square--light"} ${selected === square ? "game-square--selected" : ""}`} onClick={() => select(square)}><span>{piece ? pieces[`${piece.color}${piece.type}`] : ""}</span></button>;
               }))}
             </div>
             {mode !== "watch" && <button className="button button--quiet resign-button" onClick={() => setFinished(`${name} resigned. The computer wins.`)}><Flag /> Resign and analyze</button>}

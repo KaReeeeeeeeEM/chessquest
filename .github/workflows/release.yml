@@ -70,7 +70,9 @@ jobs:
           tagName: v__VERSION__
           releaseName: ChessQuest __VERSION__
           releaseBody: |
-            This ChessQuest release turns imported EPUB pages into a responsive, book-like reading experience with genuine title and author details, running heads, comfortable typography, page folios, and subtle page-turn motion. Imported titles also receive a designed cover in the library.
+            ChessQuest 0.5.0 adds a clearer, more personal learning loop: real seven-day reading trends, removable books, richer EPUB lesson detection, board coordinates, larger pieces, expanded typography controls, and a responsive book-like reader.
+
+            Computer play now uses a varied opening repertoire, side-aware evaluation, and repetition avoidance. Club Room can create shareable Lichess open challenges for real online games, while release history uses accessible accordions and one operating-system download menu per version.
 
             Desktop users can check for future signed updates from the bottom of the sidebar and install them without repeatedly downloading a full installer manually.
 

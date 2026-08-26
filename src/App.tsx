@@ -8,6 +8,8 @@ import {
   ChevronLeft,
   ChevronRight,
   CircleHelp,
+  Copy,
+  ExternalLink,
   Flame,
   Gamepad2,
   Library,
@@ -17,8 +19,10 @@ import {
   PanelLeftOpen,
   RotateCcw,
   Settings,
+  Swords,
   Sun,
   Target,
+  Trash2,
   Users,
 } from "lucide-react";
 import { Chess, type Square } from "chess.js";
@@ -59,7 +63,8 @@ type View =
   | "reader"
   | "games";
 type Theme = "light" | "dark";
-type FontChoice = "nunito" | "geist" | "serif";
+type FontChoice = "nunito" | "geist" | "serif" | "system" | "verdana" | "mono";
+type FontSizeChoice = "compact" | "comfortable" | "large";
 type ColorChoice = "forest" | "ocean" | "plum" | "ember";
 type SoundStyle = "classic" | "soft" | "silent";
 const lessonFen =
@@ -425,6 +430,7 @@ export default function App() {
   const [fontChoice, setFontChoice] = useState<FontChoice>(
     () => (localStorage.getItem("cq-font") as FontChoice) || "nunito",
   );
+  const [fontSizeChoice, setFontSizeChoice] = useState<FontSizeChoice>(() => (localStorage.getItem("cq-font-size") as FontSizeChoice) || "comfortable");
   const [colorChoice, setColorChoice] = useState<ColorChoice>(
     () => (localStorage.getItem("cq-color") as ColorChoice) || "forest",
   );
@@ -450,12 +456,14 @@ export default function App() {
   }, [theme]);
   useEffect(() => {
     document.documentElement.dataset.font = fontChoice;
+    document.documentElement.dataset.fontSize = fontSizeChoice;
     document.documentElement.dataset.color = colorChoice;
     localStorage.setItem("cq-font", fontChoice);
+    localStorage.setItem("cq-font-size", fontSizeChoice);
     localStorage.setItem("cq-color", colorChoice);
     localStorage.setItem("cq-username", username);
     localStorage.setItem("cq-sounds", soundStyle);
-  }, [colorChoice, fontChoice, soundStyle, username]);
+  }, [colorChoice, fontChoice, fontSizeChoice, soundStyle, username]);
   useEffect(() => {
     localStorage.setItem(
       "cq-sidebar",
@@ -549,6 +557,12 @@ export default function App() {
     setImportedBooks(next);
     saveImportedBooks(next);
     setView("library");
+  }
+  function removeImportedBook(bookId: string) {
+    const next = importedBooks.filter((book) => book.id !== bookId);
+    setImportedBooks(next);
+    saveImportedBooks(next);
+    if (selectedBookId === bookId) setSelectedBookId(null);
   }
   async function toggleReminders() {
     if (remindersEnabled) {
@@ -645,7 +659,6 @@ export default function App() {
             onClick={() => setView("review")}
             icon={<Target />}
             label="Review"
-            badge={completedGames.length ? String(completedGames.length) : undefined}
           />
           <Nav
             active={view === "games"}
@@ -737,6 +750,7 @@ export default function App() {
             onImport={() => setView("import")}
             importedBooks={importedBooks}
             progress={readingProgress}
+            onRemove={removeImportedBook}
           />
         )}{" "}
         {view === "import" && (
@@ -760,6 +774,8 @@ export default function App() {
             onUsernameChange={setUsername}
             fontChoice={fontChoice}
             onFontChange={setFontChoice}
+            fontSizeChoice={fontSizeChoice}
+            onFontSizeChange={setFontSizeChoice}
             colorChoice={colorChoice}
             onColorChange={setColorChoice}
             soundStyle={soundStyle}
@@ -811,6 +827,8 @@ function SettingsView({
   onUsernameChange,
   fontChoice,
   onFontChange,
+  fontSizeChoice,
+  onFontSizeChange,
   colorChoice,
   onColorChange,
   soundStyle,
@@ -830,6 +848,8 @@ function SettingsView({
   onUsernameChange: (value: string) => void;
   fontChoice: FontChoice;
   onFontChange: (value: FontChoice) => void;
+  fontSizeChoice: FontSizeChoice;
+  onFontSizeChange: (value: FontSizeChoice) => void;
   colorChoice: ColorChoice;
   onColorChange: (value: ColorChoice) => void;
   soundStyle: SoundStyle;
@@ -877,7 +897,11 @@ function SettingsView({
             <label htmlFor="font-choice"><strong>Font family</strong></label>
             <small>Nunito Sans is the new reading-friendly default.</small>
           </div>
-          <Select value={fontChoice} onValueChange={(value) => onFontChange(value as FontChoice)}><SelectTrigger id="font-choice" className="setting-control"><SelectValue>{fontChoice === "nunito" ? "Nunito Sans" : fontChoice === "geist" ? "Geist" : "Classic serif"}</SelectValue></SelectTrigger><SelectContent><SelectGroup><SelectItem value="nunito">Nunito Sans</SelectItem><SelectItem value="geist">Geist</SelectItem><SelectItem value="serif">Classic serif</SelectItem></SelectGroup></SelectContent></Select>
+          <Select value={fontChoice} onValueChange={(value) => onFontChange(value as FontChoice)}><SelectTrigger id="font-choice" className="setting-control"><SelectValue>{({ nunito: "Nunito Sans", geist: "Geist", serif: "Classic serif", system: "System UI", verdana: "Verdana", mono: "Monospace" } as Record<FontChoice, string>)[fontChoice]}</SelectValue></SelectTrigger><SelectContent><SelectGroup><SelectItem value="nunito">Nunito Sans</SelectItem><SelectItem value="geist">Geist</SelectItem><SelectItem value="serif">Classic serif</SelectItem><SelectItem value="system">System UI</SelectItem><SelectItem value="verdana">Verdana</SelectItem><SelectItem value="mono">Monospace</SelectItem></SelectGroup></SelectContent></Select>
+        </div>
+        <div className="setting-row">
+          <div><label htmlFor="font-size-choice"><strong>Font size</strong></label><small>Scales reading and interface text across the application.</small></div>
+          <Select value={fontSizeChoice} onValueChange={(value) => onFontSizeChange(value as FontSizeChoice)}><SelectTrigger id="font-size-choice" className="setting-control"><SelectValue>{fontSizeChoice[0].toUpperCase() + fontSizeChoice.slice(1)}</SelectValue></SelectTrigger><SelectContent><SelectGroup><SelectItem value="compact">Compact</SelectItem><SelectItem value="comfortable">Comfortable</SelectItem><SelectItem value="large">Large</SelectItem></SelectGroup></SelectContent></Select>
         </div>
         <div className="setting-row">
           <div>
@@ -984,6 +1008,13 @@ function Home({
     : 0;
   const pagesToday = progress.pagesByDate[localDateKey()] || 0;
   const currentStreak = readingStreak(progress.pagesByDate);
+  const trend = Array.from({ length: 7 }, (_, offset) => {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - offset));
+    const key = localDateKey(date);
+    return { label: new Intl.DateTimeFormat(undefined, { weekday: "narrow" }).format(date), value: progress.pagesByDate[key] || 0 };
+  });
+  const trendMax = Math.max(1, ...trend.map((day) => day.value));
   return (
     <div className="content-grid mount">
       <section className="hero-card">
@@ -1031,6 +1062,10 @@ function Home({
             ? `${Math.max(0, totalPages - pagesRead)} pages remain. Progress changes only when you finish a real page.`
             : "Your progress begins at zero and grows only from pages you read."}
         </p>
+        <div className="reading-trend" aria-label="Pages read during the last seven days">
+          <div><strong>Seven-day reading trend</strong><span>{trend.reduce((sum, day) => sum + day.value, 0)} pages</span></div>
+          <div className="reading-trend-bars">{trend.map((day, index) => <div key={`${day.label}-${index}`}><i style={{ height: `${Math.max(day.value ? 14 : 3, (day.value / trendMax) * 100)}%` }} /><span>{day.label}</span><small>{day.value}</small></div>)}</div>
+        </div>
       </section>
       <aside className="side-stack">
         <section className="card compact">
@@ -1177,12 +1212,15 @@ function LibraryView({
   onImport,
   importedBooks,
   progress,
+  onRemove,
 }: {
   onRead: (book: ImportedBook) => void;
   onImport: () => void;
   importedBooks: ImportedBook[];
   progress: ReadingProgress;
+  onRemove: (bookId: string) => void;
 }) {
+  const [removingId, setRemovingId] = useState<string | null>(null);
   return (
     <div className="library-list mount">
       <div className="library-toolbar">
@@ -1231,9 +1269,9 @@ function LibraryView({
               read
             </small>
           </div>
-          <Button variant="outline" onClick={() => onRead(b)}>
-            {progress.pagesByBook[b.id] ? "Continue reading" : "Start reading"}
-          </Button>
+          <div className="book-actions">
+            {removingId === b.id ? <><span>Remove this book from this device?</span><Button variant="outline" onClick={() => setRemovingId(null)}>Keep</Button><Button onClick={() => { onRemove(b.id); setRemovingId(null); }}>Remove</Button></> : <><Button variant="quiet" aria-label={`Remove ${b.title}`} onClick={() => setRemovingId(b.id)}><Trash2 /> Remove</Button><Button variant="outline" onClick={() => onRead(b)}>{progress.pagesByBook[b.id] ? "Continue reading" : "Start reading"}</Button></>}
+          </div>
         </article>
       ))}
     </div>
@@ -1393,15 +1431,26 @@ function Reader({
   );
 }
 function Club() {
+  const [minutes, setMinutes] = useState("10");
+  const [increment, setIncrement] = useState("0");
+  const [challengeUrl, setChallengeUrl] = useState("");
+  const [clubStatus, setClubStatus] = useState<"idle" | "creating" | "error">("idle");
+  async function createChallenge() {
+    setClubStatus("creating");
+    try {
+      const body = new URLSearchParams({ "clock.limit": String(Number(minutes) * 60), "clock.increment": increment, variant: "standard", name: "ChessQuest Club Room" });
+      const response = await fetch("https://lichess.org/api/challenge/open", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body });
+      if (!response.ok) throw new Error("challenge failed");
+      const result = await response.json() as { url?: string; challenge?: { url?: string } };
+      const url = result.url || result.challenge?.url;
+      if (!url) throw new Error("challenge missing");
+      setChallengeUrl(url);
+      setClubStatus("idle");
+    } catch {
+      setClubStatus("error");
+    }
+  }
   return (
-    <section className="empty-card card mount">
-      <Users aria-hidden="true" />
-      <span className="pill">NO CLUB DATA YET</span>
-      <h2>Your club space is ready</h2>
-      <p>
-        Member counts, votes, and meetings will appear only after real people
-        join and take those actions.
-      </p>
-    </section>
+    <div className="club-online mount"><section className="card club-create"><Swords aria-hidden="true" /><span className="pill">REAL ONLINE MATCH</span><h2>Create a club challenge</h2><p>ChessQuest uses Lichess’s official open-challenge service. Share the invite; the first two people who open it are paired online. No ChessQuest account or invented opponent is involved.</p><div className="club-controls"><label>Minutes per player<Select value={minutes} onValueChange={(value) => setMinutes(value || "10")}><SelectTrigger><SelectValue>{minutes} minutes</SelectValue></SelectTrigger><SelectContent><SelectGroup><SelectItem value="3">3 minutes</SelectItem><SelectItem value="5">5 minutes</SelectItem><SelectItem value="10">10 minutes</SelectItem><SelectItem value="30">30 minutes</SelectItem></SelectGroup></SelectContent></Select></label><label>Increment<Select value={increment} onValueChange={(value) => setIncrement(value || "0")}><SelectTrigger><SelectValue>{increment} seconds</SelectValue></SelectTrigger><SelectContent><SelectGroup><SelectItem value="0">No increment</SelectItem><SelectItem value="2">2 seconds</SelectItem><SelectItem value="5">5 seconds</SelectItem><SelectItem value="10">10 seconds</SelectItem></SelectGroup></SelectContent></Select></label></div><Button onClick={() => void createChallenge()} disabled={clubStatus === "creating"}>{clubStatus === "creating" ? "Creating secure invite…" : "Create online match"}</Button>{clubStatus === "error" && <p className="club-error" role="alert">The challenge service could not be reached. Check your connection and try again.</p>}</section>{challengeUrl && <section className="card club-invite" aria-live="polite"><span className="eyebrow">INVITE READY</span><h2>Send this to your opponent</h2><a href={challengeUrl} target="_blank" rel="noreferrer">{challengeUrl}</a><div><Button variant="outline" onClick={() => void navigator.clipboard.writeText(challengeUrl)}><Copy /> Copy invite</Button><a className="button button--primary" href={challengeUrl} target="_blank" rel="noreferrer">Join match <ExternalLink /></a></div><small>The live board, clocks, fair-play controls, and matchmaking are operated by Lichess.</small></section>}</div>
   );
 }

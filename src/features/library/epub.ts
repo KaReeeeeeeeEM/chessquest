@@ -5,6 +5,7 @@ export type InteractiveChapter = {
   title: string;
   excerpt: string;
   moveCount: number;
+  questionCount?: number;
   activity: "read-and-recall" | "guess-the-move" | "position-study";
 };
 
@@ -123,6 +124,7 @@ export async function importEpub(file: File): Promise<ImportedBook> {
     const baseTitle = cleanText(heading).slice(0, 100) || "Untitled section";
     pages.forEach((pageText, pageIndex) => {
       const moveCount = (pageText.match(MOVE_PATTERN) || []).length;
+      const questionCount = (pageText.match(/\?/g) || []).length + (pageText.match(/\b(?:find|choose|explain|calculate|consider|which move|what should|why)\b/gi) || []).length;
       chapters.push({
         id: `page-${chapters.length + 1}`,
         title:
@@ -131,9 +133,10 @@ export async function importEpub(file: File): Promise<ImportedBook> {
             : baseTitle,
         excerpt: pageText,
         moveCount,
+        questionCount,
         activity: POSITION_WORDS.test(pageText)
           ? "position-study"
-          : moveCount >= 3
+          : moveCount >= 3 || questionCount > 0
             ? "guess-the-move"
             : "read-and-recall",
       });

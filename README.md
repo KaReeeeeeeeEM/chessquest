@@ -44,6 +44,8 @@ ChessQuest does not send book content to a generative model. EPUB processing, pr
 - Click or drag pieces on guided lesson boards.
 - Animate moves and provide move, capture, check, and checkmate sounds.
 - Play a local engine with beginner, casual, club, and expert levels.
+- Learn coordinates from file and rank labels around every playable and review board.
+- Meet a more varied local opponent with standard opening families and repetition avoidance.
 - Choose bullet, blitz, rapid, or classical time controls.
 - Watch computer-versus-computer matches with Coach Rook commentary.
 - See Coach Rook visibly consider candidate moves before replying.
@@ -68,6 +70,10 @@ ChessQuest does not send book content to a generative model. EPUB processing, pr
 - Nunito Sans, Geist, and classic serif typography choices.
 - Configurable sounds, haptics, reminders, and sidebar behavior.
 - A widget gallery with small, medium, and large previews.
+- Compact, comfortable, and large application-wide font sizes plus six font-family choices.
+- Seven-day reading trend charts built only from completed local reading pages.
+- Shareable online Club Room challenges powered by Lichess; games open on Lichess for clocks and fair play.
+- Remove imported books with an explicit confirmation while keeping progress data honest.
 
 ## Download
 
@@ -89,6 +95,7 @@ ChessQuest is local-first:
 - The computer opponent and move classification run locally.
 - Native reminder permission is requested only when reminders are enabled.
 - No account is required for the current release.
+- Creating a Club Room challenge contacts Lichess and opens the game in the user’s browser; no book text is sent.
 - Desktop update checks are user-initiated from the sidebar; updates are signature-verified before installation.
 
 Removing the application does not necessarily clear WebView application data. Use the application’s controls before uninstalling when data removal is important.
@@ -188,6 +195,7 @@ The public website source lives in [`website/`](website/) and deploys from this 
 - Published releases provide an Android universal APK, macOS universal DMG, Windows x64 installers, and Linux x64 packages.
 - Widget selection changes the in-app Today widget. A native macOS Notification Center widget requires a separately signed WidgetKit extension.
 - Match review is deterministic and rule-based rather than powered by a full-strength external engine.
+- Online Club Room games are hosted by Lichess rather than embedded in the local application.
 - Elo after one calibration game is provisional, not an official rating.
 
 ## Contributing

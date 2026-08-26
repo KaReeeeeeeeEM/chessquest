@@ -19,6 +19,12 @@
 :root[data-font="serif"] {
   font-family: Georgia, "Times New Roman", serif;
 }
+:root[data-font="system"] { font-family: system-ui, -apple-system, sans-serif; }
+:root[data-font="verdana"] { font-family: Verdana, Geneva, sans-serif; }
+:root[data-font="mono"] { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; }
+:root[data-font-size="compact"] { font-size: 14px; }
+:root[data-font-size="comfortable"] { font-size: 16px; }
+:root[data-font-size="large"] { font-size: 18px; }
 :root[data-color="ocean"] {
   --bg: #f1f6f8;
   --surface: #fbfefe;
@@ -1034,11 +1040,30 @@ blockquote {
 .book-card small {
   color: var(--muted);
 }
+.book-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+.book-actions > span { width: 100%; color: var(--muted); font-size: 12px; text-align: right; }
 .book-card .book-cover small { color: inherit; }
 .progress-copy {
   color: var(--muted);
   line-height: 1.6;
 }
+.reading-trend { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+.reading-trend > div:first-child { display: flex; justify-content: space-between; gap: 16px; }
+.reading-trend > div:first-child span { color: var(--muted); font-size: 12px; }
+.reading-trend-bars { height: 130px; display: grid; grid-template-columns: repeat(7, 1fr); align-items: end; gap: 9px; margin-top: 16px; }
+.reading-trend-bars > div { height: 100%; display: grid; grid-template-rows: 1fr auto auto; justify-items: center; gap: 4px; color: var(--muted); font-size: 10px; }
+.reading-trend-bars i { width: min(24px, 70%); align-self: end; border-radius: 7px 7px 3px 3px; background: var(--primary); transition: height 260ms ease; }
+.reading-trend-bars small { color: var(--fg); font-weight: 800; }
+.club-online { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr); gap: 20px; }
+.club-create > svg { width: 48px; height: 48px; color: var(--primary); }
+.club-create h2,.club-invite h2 { margin: 14px 0 10px; font-family: Georgia, serif; font-size: clamp(34px, 4vw, 50px); }
+.club-create > p,.club-invite > small { color: var(--muted); line-height: 1.6; }
+.club-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0; }
+.club-controls label { display: grid; gap: 7px; font-weight: 800; }
+.club-invite { align-self: start; }
+.club-invite > a { display: block; margin: 18px 0; overflow-wrap: anywhere; color: var(--primary); font-weight: 800; }
+.club-invite > div { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.club-error { color: #a3482c; }
 .reader-page {
   width: 100%;
   max-width: 1040px;
@@ -1348,6 +1373,7 @@ blockquote {
 .elo-result strong { font-size: 30px; color: var(--primary); }
 .elo-result small { grid-column: 2 / -1; color: var(--muted); }
 .game-square {
+  position: relative;
   width: 100%;
   height: 100%;
   min-width: 0;
@@ -1361,6 +1387,8 @@ blockquote {
   font-size: clamp(32px, 10cqw, 82px);
   line-height: 1;
 }
+.game-square::after, .review-board > span::after { content: attr(data-file); position: absolute; right: 4px; bottom: 2px; color: currentColor; font: 800 10px/1 "Nunito Sans Variable", sans-serif; opacity: .7; text-shadow: none; }
+.game-square::before, .review-board > span::before { content: attr(data-rank); position: absolute; top: 3px; left: 4px; color: currentColor; font: 800 10px/1 "Nunito Sans Variable", sans-serif; opacity: .7; text-shadow: none; }
 .game-square--light {
   background: #e3d7b7;
 }
@@ -1609,7 +1637,7 @@ blockquote {
 .review-toolbar strong, .review-toolbar .eyebrow { display: block; }
 .review-game-select { width: min(280px, 100%); }
 .review-board { width: 100%; aspect-ratio: 1; container-type: inline-size; display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); overflow: hidden; border: 7px solid var(--fg); border-radius: 8px; }
-.review-board > span { display: grid; place-items: center; min-width: 0; font-size: clamp(32px, 10cqw, 82px); line-height: 1; transition: box-shadow 180ms ease, filter 180ms ease; }
+.review-board > span { position: relative; display: grid; place-items: center; min-width: 0; font-size: clamp(32px, 10cqw, 82px); line-height: 1; transition: box-shadow 180ms ease, filter 180ms ease; }
 .review-board .light { background: #e3d7b7; color: #17211c; }
 .review-board .dark { background: #7f987c; color: #17211c; }
 .review-board .review-square--changed { box-shadow: inset 0 0 0 5px #d9b04c; filter: saturate(1.12); }
@@ -1760,6 +1788,7 @@ blockquote {
   }
   .lesson-grid,
   .club-grid,
+  .club-online,
   .computer-game,
   .game-analysis,
   .review-player {
@@ -1853,10 +1882,12 @@ blockquote {
     flex-direction: column;
   }
   .setting-inline,
+  .club-controls,
   .game-clock {
     align-items: stretch;
     flex-direction: column;
   }
+  .club-controls { grid-template-columns: 1fr; }
   .setting-inline .setting-control,
   .setting-inline .button,
   .game-clock span {
@@ -1874,6 +1905,8 @@ blockquote {
   .book-card > .button {
     grid-column: 1/-1;
   }
+  .book-actions { grid-column: 1/-1; justify-content: stretch; }
+  .book-actions .button { flex: 1; }
   .library-toolbar,
   .import-actions {
     align-items: stretch;

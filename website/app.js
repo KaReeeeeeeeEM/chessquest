@@ -46,6 +46,19 @@ function makeDownloadLink(asset, platform, className = "download-row-button") {
   return link;
 }
 
+function makePlatformMenu(release) {
+  const wrapper = document.createElement("details");
+  wrapper.className = "release-download-menu";
+  const trigger = document.createElement("summary");
+  trigger.textContent = "Download";
+  trigger.setAttribute("aria-label", `Choose a download for ${release.name || release.tag_name}`);
+  const menu = document.createElement("div");
+  menu.className = "release-platform-options";
+  availableAssets(release).forEach(({ platform, asset }) => menu.append(makeDownloadLink(asset, platform)));
+  wrapper.append(trigger, menu);
+  return wrapper;
+}
+
 function availableAssets(release) {
   return Object.keys(PLATFORM_DETAILS)
     .map((platform) => ({ platform, asset: findAsset(release.assets, platform) }))
@@ -82,26 +95,30 @@ function renderReleaseHistory(releases) {
   const releaseList = document.querySelector("#release-list");
   if (!releaseList) return;
   releaseList.replaceChildren(...releases.map((release) => {
-    const article = document.createElement("article");
+    const article = document.createElement("details");
+    article.className = "release-accordion";
+    const summary = document.createElement("summary");
     const info = document.createElement("div");
     const name = document.createElement("strong");
     name.textContent = release.name || release.tag_name;
     const date = document.createElement("span");
     date.textContent = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(release.published_at));
     info.append(name, date);
+    const chevron = document.createElement("span");
+    chevron.className = "release-chevron";
+    chevron.textContent = "⌄";
+    summary.append(info, makePlatformMenu(release), chevron);
+    const panel = document.createElement("div");
+    panel.className = "release-notes";
+    const heading = document.createElement("strong");
+    heading.textContent = "Release notes";
     const description = document.createElement("p");
-    description.textContent = release.body?.replace(/\\n/g, "\n").split("\n")[0] || "ChessQuest release.";
-    const actions = document.createElement("div");
-    actions.className = "release-actions";
-    availableAssets(release).forEach(({ platform, asset }) => actions.append(makeDownloadLink(asset, platform)));
-    if (!actions.children.length) {
-      const notes = document.createElement("a");
-      notes.className = "download-row-button";
-      notes.href = release.html_url;
-      notes.textContent = "View release →";
-      actions.append(notes);
-    }
-    article.append(info, description, actions);
+    description.textContent = release.body?.replace(/\\n/g, "\n") || "No release notes were provided.";
+    const notes = document.createElement("a");
+    notes.href = release.html_url;
+    notes.textContent = "View this release on GitHub →";
+    panel.append(heading, description, notes);
+    article.append(summary, panel);
     return article;
   }));
 }
@@ -115,3 +132,7 @@ fetch(RELEASES_API)
     renderReleaseHistory(releases);
   })
   .catch(() => { /* Keep usable links to the GitHub release page when the API is unavailable. */ });
+
+document.addEventListener("click", (event) => {
+  if (event.target instanceof Element && event.target.closest(".release-download-menu")) event.stopPropagation();
+});

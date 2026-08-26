@@ -95,10 +95,7 @@ export function BookImporter({ onImported, onCancel }: Props) {
                 <span>{index + 1}</span>
                 <div>
                   <strong>{chapter.title}</strong>
-                  <small>
-                    {chapter.activity.replace(/-/g, " ")} · {chapter.moveCount}{" "}
-                    moves detected
-                  </small>
+                  <small>{chapter.activity.replace(/-/g, " ")} · {chapter.questionCount ? `${chapter.questionCount} practice prompt${chapter.questionCount === 1 ? "" : "s"}` : chapter.moveCount ? `${chapter.moveCount} notation example${chapter.moveCount === 1 ? "" : "s"}` : "reading and recall lesson"}</small>
                 </div>
               </div>
             ))}

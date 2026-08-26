@@ -21,4 +21,11 @@ describe("local chess engine", () => {
     expect(computerThinkDelay("club", "rapid", false, () => 1)).toBe(2510);
     expect(computerThinkDelay("expert", "classical", true, () => 1)).toBe(2920);
   });
+
+  it("varies legal replies from an offline master-opening repertoire", () => {
+    const game = new Chess();
+    game.move("e4");
+    const reply = chooseComputerMove(game, "club", [], ["e4"]);
+    expect(["e5", "c5", "c6", "e6"]).toContain(reply?.san);
+  });
 });
