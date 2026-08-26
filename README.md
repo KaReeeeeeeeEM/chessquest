@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://kareeeeeeeem.github.io/chessquest/">Website</a> ·
+  <a href="http://reelma.me/chessquest/">Website</a> ·
   <a href="https://github.com/KaReeeeeeeeEM/chessquest/releases/latest">Latest release</a> ·
   <a href="https://github.com/KaReeeeeeeeEM/chessquest/releases/latest/download/ChessQuest_0.1.0_aarch64.dmg">Download for macOS</a>
 </p>
@@ -164,7 +164,7 @@ The automated suite covers reading progress and streaks, computer move analysis,
 
 The public website source lives in [`website/`](website/) and deploys from this repository. Download buttons reference GitHub Release assets, so the site never advertises an unavailable local installer.
 
-- Website: [kareeeeeeeem.github.io/chessquest](https://kareeeeeeeem.github.io/chessquest/)
+- Website: [reelma.me/chessquest](http://reelma.me/chessquest/)
 - Repository: [github.com/KaReeeeeeeeEM/chessquest](https://github.com/KaReeeeeeeeEM/chessquest)
 - Releases: [github.com/KaReeeeeeeeEM/chessquest/releases](https://github.com/KaReeeeeeeeEM/chessquest/releases)
 
