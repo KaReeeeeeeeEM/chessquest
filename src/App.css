@@ -1089,7 +1089,7 @@ blockquote {
 .club-error { color: #a3482c; }
 .reader-page {
   width: 100%;
-  max-width: 1040px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 .reader-toolbar,
@@ -1123,6 +1123,40 @@ blockquote {
   animation: reader-page-turn 460ms cubic-bezier(.22, 1, .36, 1);
 }
 .reader-book--back { transform-origin: right center; animation-name: reader-page-turn-back; }
+.reader-flip-shell {
+  width: 100%;
+  min-height: clamp(500px, 68vw, 790px);
+  display: grid;
+  place-items: start center;
+  padding: 12px 0 22px;
+  overflow: hidden;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--primary) 7%, var(--bg));
+}
+.reader-flip-stage {
+  width: 100%;
+  min-height: clamp(500px, 68vw, 790px);
+  display: grid;
+  place-items: start center;
+}
+.reader-flip-book { margin: 0 auto; }
+.reader-flip-page {
+  position: relative;
+  box-sizing: border-box;
+  width: 560px;
+  height: 760px;
+  padding: 42px 48px 54px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--border) 82%, var(--primary));
+  background: color-mix(in srgb, var(--surface) 96%, var(--accent));
+  color: var(--fg);
+  box-shadow: inset 18px 0 28px rgb(0 0 0 / 5%), inset -3px 0 7px rgb(0 0 0 / 4%);
+}
+.reader-flip-page::before { content: ""; position: absolute; inset: 14px; border: 1px solid color-mix(in srgb, var(--border) 62%, transparent); pointer-events: none; }
+.reader-page-scroll { height: calc(100% - 52px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+.reader-flip-page .reader-title-block { margin: clamp(28px, 5vh, 54px) auto 34px; }
+.reader-flip-page h2 { margin: 12px 0 0; font-family: Georgia, serif; font-size: clamp(30px, 4vw, 46px); font-weight: 600; line-height: 1.08; text-wrap: balance; }
+.reader-flip-page .reader-prose p { font-size: clamp(17px, 1.55vw, 20px); }
 .reader-book::after {
   content: "";
   position: absolute;
@@ -1845,6 +1879,12 @@ blockquote {
   }
 }
 @media (max-width: 620px) {
+  .reader-flip-shell,
+  .reader-flip-stage { min-height: min(135vw, 720px); }
+  .reader-flip-page { padding: 30px 26px 46px; }
+  .reader-next { align-items: stretch; flex-direction: column; }
+  .reader-page-controls { display: grid; grid-template-columns: 1fr 1fr; }
+  .reader-page-controls .button { width: 100%; }
   .onboarding-shell { padding: 12px; }
   .onboarding-card { min-height: calc(100dvh - 24px); padding: 22px; border-radius: 20px; }
   .onboarding-copy { padding: 28px 0; }

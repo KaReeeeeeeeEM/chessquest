@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
+import { PageFlip } from "page-flip";
 import {
   ArrowLeft,
   BookPlus,
@@ -1343,25 +1344,101 @@ function Reader({
     Math.min(pagesRead, Math.max(0, book.chapters.length - 1)),
   );
   const [checkpoint, setCheckpoint] = useState<number | null>(null);
-  const [turnDirection, setTurnDirection] = useState<"forward" | "back">("forward");
+  const flipStageRef = useRef<HTMLDivElement>(null);
+  const pageFlipRef = useRef<PageFlip | null>(null);
   const complete = pagesRead >= book.chapters.length;
-  const page = book.chapters[pageIndex];
-  const titleParts = page.title.split(/\s+·\s+/);
-  const sectionTitle = titleParts[0];
-  const sectionPart = titleParts[1] || null;
-  const paragraphs = readingParagraphs(page.excerpt);
   const displayedProgress = Math.max(pagesRead, pageIndex);
   const percent = Math.min(
     100,
     Math.round((displayedProgress / book.chapters.length) * 100),
   );
 
+  useEffect(() => {
+    const stage = flipStageRef.current;
+    if (!stage || checkpoint !== null || complete) return;
+    const host = document.createElement("div");
+    host.className = "reader-flip-book";
+    stage.replaceChildren(host);
+
+    book.chapters.forEach((chapter, chapterIndex) => {
+      const chapterTitleParts = chapter.title.split(/\s+·\s+/);
+      const sheet = document.createElement("section");
+      sheet.className = "reader-flip-page";
+      const runningHead = document.createElement("header");
+      runningHead.className = "reader-running-head";
+      const bookName = document.createElement("span");
+      bookName.textContent = book.title;
+      const author = document.createElement("span");
+      author.textContent = book.author;
+      runningHead.append(bookName, author);
+      const scroll = document.createElement("div");
+      scroll.className = "reader-page-scroll";
+      const titleBlock = document.createElement("div");
+      titleBlock.className = "reader-title-block";
+      const eyebrow = document.createElement("span");
+      eyebrow.className = "eyebrow";
+      eyebrow.textContent = chapterTitleParts[1] ? `SECTION · ${chapterTitleParts[1]}` : "CURRENT SECTION";
+      const heading = document.createElement("h2");
+      heading.textContent = chapterTitleParts[0];
+      const ornament = document.createElement("div");
+      ornament.className = "reader-ornament";
+      ornament.setAttribute("aria-hidden", "true");
+      ornament.innerHTML = "<i></i><span>♞</span><i></i>";
+      titleBlock.append(eyebrow, heading, ornament);
+      const prose = document.createElement("div");
+      prose.className = "reader-prose";
+      readingParagraphs(chapter.excerpt).forEach((copy) => {
+        const paragraph = document.createElement("p");
+        paragraph.textContent = copy;
+        prose.append(paragraph);
+      });
+      scroll.append(titleBlock, prose);
+      const folio = document.createElement("footer");
+      folio.className = "reader-folio";
+      folio.setAttribute("aria-label", `Book page ${chapterIndex + 1}`);
+      const pageNumber = document.createElement("span");
+      pageNumber.textContent = String(chapterIndex + 1);
+      folio.append(pageNumber);
+      sheet.append(runningHead, scroll, folio);
+      host.append(sheet);
+    });
+
+    const flipBook = new PageFlip(host, {
+      width: 560,
+      height: 760,
+      size: "stretch",
+      minWidth: 280,
+      maxWidth: 560,
+      minHeight: 380,
+      maxHeight: 760,
+      startPage: pageIndex,
+      flippingTime: 720,
+      drawShadow: true,
+      maxShadowOpacity: 0.35,
+      showCover: false,
+      usePortrait: true,
+      autoSize: true,
+      mobileScrollSupport: true,
+      clickEventForward: false,
+      useMouseEvents: true,
+      showPageCorners: true,
+      disableFlipByClick: true,
+    });
+    flipBook.loadFromHTML(host.querySelectorAll<HTMLElement>(".reader-flip-page"));
+    flipBook.on("flip", (event) => setPageIndex(event.data));
+    pageFlipRef.current = flipBook;
+    return () => {
+      pageFlipRef.current = null;
+      flipBook.destroy();
+      stage.replaceChildren();
+    };
+  }, [book, checkpoint, complete]);
+
   function finishPage() {
     const nextPage = pageIndex + 1;
     const alreadyRead = nextPage <= pagesRead;
-    setTurnDirection("forward");
     if (alreadyRead) {
-      setPageIndex(Math.min(nextPage, book.chapters.length - 1));
+      pageFlipRef.current?.flipNext("top");
       return;
     }
     onPageRead(nextPage);
@@ -1372,13 +1449,12 @@ function Reader({
       if (hapticsEnabled && "vibrate" in navigator)
         navigator.vibrate([30, 35, 55, 45, 90]);
     } else {
-      setPageIndex(nextPage);
+      pageFlipRef.current?.flipNext("top");
     }
   }
 
   function previousPage() {
-    setTurnDirection("back");
-    setPageIndex((current) => Math.max(0, current - 1));
+    pageFlipRef.current?.flipPrev("top");
   }
 
   if (complete && checkpoint === null)
@@ -1452,24 +1528,8 @@ function Reader({
           <Progress value={percent} label={`${book.title} reading progress`} />
         </div>
       </header>
-      <div className={`reader-book reader-book--${turnDirection}`} key={page.id}>
-        <section className="reader-sheet">
-          <header className="reader-running-head">
-            <span>{book.title}</span>
-            <span>{book.author}</span>
-          </header>
-          <div className="reader-title-block">
-            <span className="eyebrow">{sectionPart ? `SECTION · ${sectionPart}` : "CURRENT SECTION"}</span>
-            <h2>{sectionTitle}</h2>
-            <div className="reader-ornament" aria-hidden="true"><i /><span>♞</span><i /></div>
-          </div>
-          <div className="reader-prose">
-            {paragraphs.map((paragraph, index) => <p key={`${page.id}-${index}`}>{paragraph}</p>)}
-          </div>
-          <footer className="reader-folio" aria-label={`Book page ${pageIndex + 1}`}>
-            <span>{pageIndex + 1}</span>
-          </footer>
-        </section>
+      <div className="reader-flip-shell" aria-label={`${book.title} interactive HTML book`}>
+        <div className="reader-flip-stage" ref={flipStageRef} />
       </div>
       <footer className="reader-next">
         <span>This page counts only when you finish it.</span>

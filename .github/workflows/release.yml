@@ -70,7 +70,7 @@ jobs:
           tagName: v__VERSION__
           releaseName: ChessQuest __VERSION__
           releaseBody: |
-            ChessQuest 0.6.0 expands Club Room and game explanations into focused full-width learning spaces. The book reader now supports backward navigation and directional page-turn animation, while genuine reading progress earns an original sound, spark, and optional haptic streak celebration.
+            ChessQuest 0.6.1 introduces a fixed-proportion HTML book reader powered by StPageFlip. Every page keeps a consistent paper size regardless of text length, with touch-friendly soft page turns, responsive portrait and spread layouts, and preserved reading controls and progress.
 
             The downloads website now vertically centers its download chevron and uses concise operating-system labels inside each version menu.
 
