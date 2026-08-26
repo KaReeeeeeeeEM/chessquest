@@ -137,23 +137,24 @@ jobs:
           printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
           node scripts/configure-android-signing.mjs
 
-      - name: Build and upload signed Android packages
-        uses: tauri-apps/tauri-action@v0.6.2
+      - name: Build signed Android packages
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
-        with:
-          tagName: v__VERSION__
-          releaseName: ChessQuest __VERSION__
-          releaseBody: |
-            Production-responsive ChessQuest release for Android, macOS, Windows, and Linux.
+        run: npm run tauri -- android build --apk --aab --ci
 
-            Choose the installer for your operating system from the assets below.
-          releaseDraft: true
-          prerelease: false
-          retryAttempts: 2
-          mobile: android
-          args: --apk --aab --ci
+      - name: Collect Android release packages
+        shell: bash
+        run: |
+          mkdir -p android-release
+          find src-tauri/gen/android/app/build/outputs -type f \( -name '*.apk' -o -name '*.aab' \) -exec cp {} android-release/ \;
+          test -n "$(find android-release -type f -print -quit)"
+
+      - name: Upload Android release packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release
+          path: android-release/*
+          if-no-files-found: error
 
   publish:
     name: Publish verified release
@@ -164,10 +165,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Download Android release packages
+        uses: actions/download-artifact@v4
+        with:
+          name: android-release
+          path: android-release
+
       - name: Publish release as latest
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
           version="$(node -p "require('./package.json').version")"
+          gh release upload "v${version}" android-release/* --repo "${{ github.repository }}" --clobber
           gh release edit "v${version}" --repo "${{ github.repository }}" --draft=false --latest
