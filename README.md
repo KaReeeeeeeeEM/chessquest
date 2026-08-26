@@ -68,7 +68,7 @@ ChessQuest does not send book content to a generative model. EPUB processing, pr
 
 ## Download
 
-The current release supports macOS, Windows, and Linux.
+The current release supports Android, macOS, Windows, and Linux.
 
 **[Download the recommended ChessQuest installer](http://reelma.me/chessquest/downloads.html)**
 
@@ -93,7 +93,7 @@ Removing the application does not necessarily clear WebView application data. Us
 
 | Layer | Technology | Purpose |
 | --- | --- | --- |
-| Desktop | Tauri 2 + Rust | Native macOS, Windows, and Linux packaging and notifications |
+| Native application | Tauri 2 + Rust | Android, macOS, Windows, and Linux packaging and notifications |
 | Interface | React 19 + TypeScript | Typed application state and UI |
 | Build | Vite | Development and production bundling |
 | Chess | chess.js | Legal moves, board state, and game rules |
@@ -181,7 +181,7 @@ The public website source lives in [`website/`](website/) and deploys from this 
 
 ## Current limitations
 
-- Published releases provide macOS universal, Windows x64, and Linux x64 installers.
+- Published releases provide an Android universal APK, macOS universal DMG, Windows x64 installers, and Linux x64 packages.
 - Widget selection changes the in-app Today widget. A native macOS Notification Center widget requires a separately signed WidgetKit extension.
 - Match review is deterministic and rule-based rather than powered by a full-strength external engine.
 - Elo after one calibration game is provisional, not an official rating.

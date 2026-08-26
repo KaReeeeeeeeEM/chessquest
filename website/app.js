@@ -9,6 +9,7 @@ document.querySelectorAll(".reveal").forEach((section) => observer.observe(secti
 
 const RELEASES_API = "https://api.github.com/repos/KaReeeeeeeeEM/chessquest/releases";
 const PLATFORM_DETAILS = {
+  android: { label: "Android", extensions: [".apk"] },
   macos: { label: "macOS", extensions: [".dmg"] },
   windows: { label: "Windows", extensions: [".exe", ".msi"] },
   linux: { label: "Linux", extensions: [".AppImage", ".deb"] },
@@ -16,6 +17,7 @@ const PLATFORM_DETAILS = {
 
 function detectPlatform() {
   const userAgent = navigator.userAgent.toLowerCase();
+  if (userAgent.includes("android")) return "android";
   if (userAgent.includes("windows")) return "windows";
   if (userAgent.includes("macintosh") || userAgent.includes("mac os")) return "macos";
   if (userAgent.includes("linux") || userAgent.includes("x11")) return "linux";

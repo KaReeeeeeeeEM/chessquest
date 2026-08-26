@@ -47,6 +47,18 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,i686-linux-android,x86_64-linux-android
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Android NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r29
+          link-to-sdk: true
+        with:
           targets: ${{ matrix.rust_targets }}
 
       - name: Cache Rust build output
@@ -68,7 +80,7 @@ jobs:
           tagName: v__VERSION__
           releaseName: ChessQuest __VERSION__
           releaseBody: |
-            Cross-platform ChessQuest release for macOS, Windows, and Linux.
+            Cross-platform ChessQuest release for Android, macOS, Windows, and Linux.
 
             Choose the installer for your operating system from the assets below.
           releaseDraft: true
@@ -76,9 +88,76 @@ jobs:
           retryAttempts: 2
           args: ${{ matrix.args }}
 
+  android:
+    name: Build Android universal
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust build output
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: ./src-tauri -> target
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Verify application
+        run: npm run typecheck && npx vitest run && npm run build
+
+      - name: Initialize Android project
+        env:
+          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: npm run tauri -- android init --ci
+
+      - name: Configure Android release signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/chessquest-upload.p12
+        run: |
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$ANDROID_KEYSTORE_PATH"
+          node scripts/configure-android-signing.mjs
+
+      - name: Build and upload signed Android packages
+        uses: tauri-apps/tauri-action@v0.6.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NDK_HOME: ${{ steps.setup-ndk.outputs.ndk-path }}
+        with:
+          tagName: v__VERSION__
+          releaseName: ChessQuest __VERSION__
+          releaseBody: |
+            Production-responsive ChessQuest release for Android, macOS, Windows, and Linux.
+
+            Choose the installer for your operating system from the assets below.
+          releaseDraft: true
+          prerelease: false
+          retryAttempts: 2
+          mobile: android
+          args: --apk --aab --ci
+
   publish:
     name: Publish verified release
-    needs: build
+    needs: [build, android]
     runs-on: ubuntu-latest
     permissions:
       contents: write
