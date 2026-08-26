@@ -132,6 +132,31 @@ function playChessSound(kind: ChessSound, style: SoundStyle = "classic") {
   window.setTimeout(() => void context.close(), 700);
 }
 
+function playStreakCelebration(style: SoundStyle) {
+  if (style === "silent") return;
+  let context: AudioContext;
+  try {
+    context = new AudioContext();
+  } catch {
+    return;
+  }
+  const notes = style === "soft" ? [392, 494, 587, 784] : [523, 659, 784, 1047];
+  notes.forEach((frequency, index) => {
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const start = context.currentTime + index * 0.085;
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(frequency, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(0.1, start + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.18);
+    oscillator.connect(gain).connect(context.destination);
+    oscillator.start(start);
+    oscillator.stop(start + 0.2);
+  });
+  window.setTimeout(() => void context.close(), 900);
+}
+
 function Button({
   children,
   variant = "primary",
@@ -793,6 +818,8 @@ export default function App() {
             onPageRead={(page) => completePage(selectedBook.id, page)}
             onExit={() => setView("library")}
             hapticsEnabled={hapticsEnabled}
+            soundStyle={soundStyle}
+            pagesToday={pagesToday}
           />
         )}
         {view === "games" && (
@@ -1301,17 +1328,22 @@ function Reader({
   onPageRead,
   onExit,
   hapticsEnabled,
+  soundStyle,
+  pagesToday,
 }: {
   book: ImportedBook;
   pagesRead: number;
   onPageRead: (pageNumber: number) => void;
   onExit: () => void;
   hapticsEnabled: boolean;
+  soundStyle: SoundStyle;
+  pagesToday: number;
 }) {
   const [pageIndex, setPageIndex] = useState(
     Math.min(pagesRead, Math.max(0, book.chapters.length - 1)),
   );
   const [checkpoint, setCheckpoint] = useState<number | null>(null);
+  const [turnDirection, setTurnDirection] = useState<"forward" | "back">("forward");
   const complete = pagesRead >= book.chapters.length;
   const page = book.chapters[pageIndex];
   const titleParts = page.title.split(/\s+·\s+/);
@@ -1326,14 +1358,27 @@ function Reader({
 
   function finishPage() {
     const nextPage = pageIndex + 1;
+    const alreadyRead = nextPage <= pagesRead;
+    setTurnDirection("forward");
+    if (alreadyRead) {
+      setPageIndex(Math.min(nextPage, book.chapters.length - 1));
+      return;
+    }
     onPageRead(nextPage);
-    if (nextPage % 5 === 0 || nextPage === book.chapters.length) {
+    const celebratesStreak = pagesToday === 0 || nextPage % 5 === 0 || nextPage === book.chapters.length;
+    if (celebratesStreak) {
       setCheckpoint(nextPage);
+      playStreakCelebration(soundStyle);
       if (hapticsEnabled && "vibrate" in navigator)
-        navigator.vibrate([35, 45, 70]);
+        navigator.vibrate([30, 35, 55, 45, 90]);
     } else {
       setPageIndex(nextPage);
     }
+  }
+
+  function previousPage() {
+    setTurnDirection("back");
+    setPageIndex((current) => Math.max(0, current - 1));
   }
 
   if (complete && checkpoint === null)
@@ -1349,10 +1394,12 @@ function Reader({
 
   if (checkpoint !== null) {
     const bookFinished = checkpoint >= book.chapters.length;
+    const fivePageCheckpoint = checkpoint % 5 === 0;
     return (
       <section className="reading-checkpoint card mount" aria-live="polite">
         <div className="checkpoint-flame" aria-hidden="true">
           <Flame />
+          <i /><i /><i /><i /><i /><i />
         </div>
         <span className="pill">
           {bookFinished ? "BOOK FINISHED" : `${checkpoint} PAGES READ`}
@@ -1360,12 +1407,16 @@ function Reader({
         <h2>
           {bookFinished
             ? `You finished ${book.title}`
-            : "That was five. Want five more?"}
+            : fivePageCheckpoint
+              ? "That was five. Want five more?"
+              : "Your reading streak is alive."}
         </h2>
         <p>
           {bookFinished
             ? "The progress is real—and the whole book is behind you."
-            : `${book.chapters.length - checkpoint} pages remain. You only need to choose the next five.`}
+            : fivePageCheckpoint
+              ? `${book.chapters.length - checkpoint} pages remain. You only need to choose the next five.`
+              : "You showed up today. Keep the momentum or leave with your progress safely recorded."}
         </p>
         <div className="checkpoint-actions">
           {!bookFinished && (
@@ -1375,7 +1426,7 @@ function Reader({
                 setCheckpoint(null);
               }}
             >
-              Yes, five more pages
+              {fivePageCheckpoint ? "Yes, five more pages" : "Keep reading"}
               <ChevronRight />
             </Button>
           )}
@@ -1401,7 +1452,7 @@ function Reader({
           <Progress value={percent} label={`${book.title} reading progress`} />
         </div>
       </header>
-      <div className="reader-book" key={page.id}>
+      <div className={`reader-book reader-book--${turnDirection}`} key={page.id}>
         <section className="reader-sheet">
           <header className="reader-running-head">
             <span>{book.title}</span>
@@ -1422,10 +1473,15 @@ function Reader({
       </div>
       <footer className="reader-next">
         <span>This page counts only when you finish it.</span>
-        <Button onClick={finishPage}>
-          Mark page read
-          <ChevronRight />
-        </Button>
+        <div className="reader-page-controls">
+          <Button variant="outline" onClick={previousPage} disabled={pageIndex === 0}>
+            <ChevronLeft /> Previous page
+          </Button>
+          <Button onClick={finishPage}>
+            {pageIndex < pagesRead ? "Next page" : "Mark page read"}
+            <ChevronRight />
+          </Button>
+        </div>
       </footer>
     </article>
   );
