@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { ChevronRight, Eye, Flag, Gauge, GraduationCap, RotateCcw } from "lucide-react";
+import { ChevronRight, Eye, Flag, Gauge, GraduationCap, RotateCcw, ScanSearch } from "lucide-react";
 import { Chess, type Move, type Square } from "chess.js";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { saveGame, type SavedGame } from "./review";
 import {
-  analyzeMoves,
   chooseComputerMove,
+  computerThinkDelay,
   reactionFor,
   type Difficulty,
 } from "./engine";
@@ -30,9 +30,10 @@ type Props = {
   sounds: boolean;
   onSound: (kind: "move" | "capture" | "check" | "checkmate") => void;
   onGameSaved?: (games: SavedGame[]) => void;
+  onReviewRequested?: () => void;
 };
 
-export function ComputerGame({ name, recommended, sounds, onSound, onGameSaved }: Props) {
+export function ComputerGame({ name, recommended, sounds, onSound, onGameSaved, onReviewRequested }: Props) {
   const [difficulty, setDifficulty] = useState<Difficulty>(recommended);
   const [speed, setSpeed] = useState<GameSpeed>("rapid");
   const [mode, setMode] = useState<GameMode>("play");
@@ -46,7 +47,11 @@ export function ComputerGame({ name, recommended, sounds, onSound, onGameSaved }
   const [whiteTime, setWhiteTime] = useState(secondsBySpeed.rapid);
   const [blackTime, setBlackTime] = useState(secondsBySpeed.rapid);
   const savedResult = useRef<string | null>(null);
-  const history = moveLog;
+  const thinkTimer = useRef<number | null>(null);
+
+  useEffect(() => () => {
+    if (thinkTimer.current) window.clearTimeout(thinkTimer.current);
+  }, []);
 
   useEffect(() => {
     if (!finished || !moveLog.length || savedResult.current === finished) return;
@@ -60,7 +65,7 @@ export function ComputerGame({ name, recommended, sounds, onSound, onGameSaved }
   }, [game, mode, started, finished, thinking]);
 
   useEffect(() => {
-    if (!started || finished || thinking) return;
+    if (!started || finished) return;
     const timer = window.setInterval(() => {
       if (game.turn() === "w")
         setWhiteTime((value) => {
@@ -103,10 +108,15 @@ export function ComputerGame({ name, recommended, sounds, onSound, onGameSaved }
 
   function computerTurn(position: Chess) {
     setThinking(true);
-    window.setTimeout(() => {
+    setComment(mode === "watch" ? "Comparing candidate moves and checking the reply…" : `Give me a moment, ${name}. I’m checking your threats and my replies.`);
+    if (thinkTimer.current) window.clearTimeout(thinkTimer.current);
+    thinkTimer.current = window.setTimeout(() => {
       const next = new Chess(position.fen());
       const choice = chooseComputerMove(next, difficulty);
-      if (!choice) return;
+      if (!choice) {
+        setThinking(false);
+        return;
+      }
       const move = next.move(choice);
       setMoveLog((moves) => [...moves, move]);
       soundFor(move, next);
@@ -114,7 +124,8 @@ export function ComputerGame({ name, recommended, sounds, onSound, onGameSaved }
       setThinking(false);
       setComment(mode === "watch" ? `${move.color === "w" ? "White" : "Black"} chose ${move.san}. Watch what that changes.` : reactionFor(move, next, name));
       finishIfNeeded(next);
-    }, 420);
+      thinkTimer.current = null;
+    }, computerThinkDelay(difficulty, speed, mode === "watch"));
   }
 
   function move(from: Square, to: Square) {
@@ -143,6 +154,7 @@ export function ComputerGame({ name, recommended, sounds, onSound, onGameSaved }
   }
 
   function start() {
+    if (thinkTimer.current) window.clearTimeout(thinkTimer.current);
     const time = secondsBySpeed[speed];
     setGame(new Chess());
     setMoveLog([]);
@@ -155,7 +167,6 @@ export function ComputerGame({ name, recommended, sounds, onSound, onGameSaved }
   }
 
   if (finished) {
-    const analysis = analyzeMoves(history);
     const playerWon = finished.includes(`${name} wins`) || finished.includes(`${name} wins!`);
     const draw = finished.includes("drawn");
     const baseRating: Record<Difficulty, number> = { beginner: 700, casual: 1000, club: 1300, expert: 1650 };
@@ -165,24 +176,18 @@ export function ComputerGame({ name, recommended, sounds, onSound, onGameSaved }
         <section className="card analysis-summary">
           <span className="pill">GAME COMPLETE</span>
           <h2>{finished}</h2>
-          <p>{history.length} half-moves played · {speed} · {difficulty}</p>
+          <p>{moveLog.length} half-moves played · {speed} · {difficulty}</p>
           {mode === "rating" && <div className="elo-result"><Gauge /><span>Provisional Elo</span><strong>{provisionalElo}</strong><small>One match is an initial estimate. Future calibration games will make it more reliable.</small></div>}
           <button className="button button--primary" onClick={start}>
             <RotateCcw /> Play again
           </button>
         </section>
-        <section className="card">
-          <span className="eyebrow">Position analysis</span>
-          <h2>Move-by-move review</h2>
-          <div className="analysis-list">
-            {analysis.map((item) => (
-              <div key={item.number}>
-                <span>{Math.ceil(item.number / 2)}{item.color === "b" ? "…" : "."}</span>
-                <strong>{item.san}</strong>
-                <small className={`analysis-${item.label.toLowerCase()}`}>{item.label}</small>
-              </div>
-            ))}
-          </div>
+        <section className="card analysis-review-cta">
+          <ScanSearch />
+          <span className="eyebrow">BOARD-BASED REVIEW</span>
+          <h2>Replay the position, not a list.</h2>
+          <p>ChessQuest will animate the match on the board and pause at the first moment where you had a meaningfully better choice.</p>
+          <button className="button button--primary" onClick={onReviewRequested}>Replay and review</button>
         </section>
       </div>
     );

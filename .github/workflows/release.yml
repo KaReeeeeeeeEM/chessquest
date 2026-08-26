@@ -64,11 +64,15 @@ jobs:
         uses: tauri-apps/tauri-action@v0.6.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: v__VERSION__
           releaseName: ChessQuest __VERSION__
           releaseBody: |
-            Cross-platform ChessQuest release for Android, macOS, Windows, and Linux.
+            This ChessQuest release makes practice feel more deliberate: Coach Rook now visibly thinks before replying, completed games replay on the board and pause at teachable decisions, and chess pieces are larger across phone, tablet, and desktop layouts.
+
+            Desktop users can check for future signed updates from the bottom of the sidebar and install them without repeatedly downloading a full installer manually.
 
             Choose the installer for your operating system from the assets below.
           releaseDraft: true

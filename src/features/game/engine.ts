@@ -14,7 +14,7 @@ const PIECE_VALUE: Record<string, number> = {
 export function evaluatePosition(game: Chess) {
   if (game.isCheckmate()) return game.turn() === "w" ? -100000 : 100000;
   if (game.isDraw()) return 0;
-  return game
+  const material = game
     .board()
     .flat()
     .reduce(
@@ -23,6 +23,28 @@ export function evaluatePosition(game: Chess) {
         (piece ? PIECE_VALUE[piece.type] * (piece.color === "w" ? 1 : -1) : 0),
       0,
     );
+  const centre = ["d4", "e4", "d5", "e5"].reduce((score, square) => {
+    const piece = game.get(square as import("chess.js").Square);
+    return score + (piece ? (piece.color === "w" ? 20 : -20) : 0);
+  }, 0);
+  const developed = ["b1", "g1", "c1", "f1", "b8", "g8", "c8", "f8"].reduce((score, square, index) => {
+    const piece = game.get(square as import("chess.js").Square);
+    const stayedHome = Boolean(piece);
+    const white = index < 4;
+    return score + (stayedHome ? 0 : white ? 12 : -12);
+  }, 0);
+  return material + centre + developed;
+}
+
+export function computerThinkDelay(
+  difficulty: Difficulty,
+  speed: "bullet" | "blitz" | "rapid" | "classical",
+  watching: boolean,
+  random = Math.random,
+) {
+  const base = { bullet: 650, blitz: 900, rapid: 1250, classical: 1650 }[speed];
+  const depthPause = { beginner: 0, casual: 180, club: 360, expert: 620 }[difficulty];
+  return Math.round(base + depthPause + random() * (watching ? 650 : 900));
 }
 
 function search(game: Chess, depth: number, alpha: number, beta: number): number {
@@ -87,4 +109,3 @@ export function analyzeMoves(moves: Move[]) {
     return { number: index + 1, san: move.san, color: move.color, label, delta };
   });
 }
-

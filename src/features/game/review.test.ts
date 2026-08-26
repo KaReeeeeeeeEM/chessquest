@@ -10,4 +10,13 @@ describe("book-grounded game review", () => {
     expect(explainMove(move, books).source?.book).toBe("My Chess Book");
     expect(explainMove(move, []).source).toBeNull();
   });
+
+  it("identifies a stronger candidate for a weak learner move", () => {
+    const game = new Chess();
+    const move = game.move("a3") as unknown as SavedMove;
+    const explanation = explainMove(move, []);
+    expect(explanation.label).toBe("Could improve");
+    expect(explanation.bestMove).not.toBe("a3");
+    expect(explanation.loss).toBeGreaterThan(15);
+  });
 });

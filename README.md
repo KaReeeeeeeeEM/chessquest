@@ -13,7 +13,7 @@
 <p align="center">
   <a href="http://reelma.me/chessquest/">Website</a> ·
   <a href="https://github.com/KaReeeeeeeeEM/chessquest/releases/latest">Latest release</a> ·
-  <a href="https://github.com/KaReeeeeeeeEM/chessquest/releases/latest/download/ChessQuest_0.1.0_aarch64.dmg">Download for macOS</a>
+  <a href="http://reelma.me/chessquest/downloads.html">Downloads for every platform</a>
 </p>
 
 ## Why ChessQuest exists
@@ -45,6 +45,7 @@ ChessQuest does not send book content to a generative model. EPUB processing, pr
 - Play a local engine with beginner, casual, club, and expert levels.
 - Choose bullet, blitz, rapid, or classical time controls.
 - Watch computer-versus-computer matches with Coach Rook commentary.
+- See Coach Rook visibly consider candidate moves before replying.
 - Play a calibration match for an explicitly provisional Elo estimate.
 
 ### Honest game review
@@ -52,6 +53,7 @@ ChessQuest does not send book content to a generative model. EPUB processing, pr
 - Store complete move histories from finished computer matches.
 - Autoplay matches from their real board positions.
 - Pause, restart, or switch completed games.
+- Pause automatically at teachable decisions and compare a stronger candidate on the board.
 - Identify good, sound, and risky moves with rule-based explanations.
 - Search imported excerpts for relevant supporting passages.
 - Report when no matching source exists instead of inventing a citation.
@@ -86,6 +88,7 @@ ChessQuest is local-first:
 - The computer opponent and move classification run locally.
 - Native reminder permission is requested only when reminders are enabled.
 - No account is required for the current release.
+- Desktop update checks are user-initiated from the sidebar; updates are signature-verified before installation.
 
 Removing the application does not necessarily clear WebView application data. Use the application’s controls before uninstalling when data removal is important.
 
@@ -176,8 +179,8 @@ The public website source lives in [`website/`](website/) and deploys from this 
 2. Build Tauri from the tested commit.
 3. Tag a semantic version.
 4. Create a GitHub Release from that commit.
-5. Attach the matching DMG.
-6. Confirm the website download resolves to that release.
+5. Attach Android, macOS, Windows, Linux, and signed updater artifacts.
+6. Confirm `latest.json` and the website downloads resolve to that release.
 
 ## Current limitations
 

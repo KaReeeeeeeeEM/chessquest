@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "ChessQuest",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "identifier": "com.chessquest.club",
   "build": {
     "frontendDist": "../dist",
@@ -27,6 +27,7 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": "all",
     "icon": [
       "icons/32x32.png",
@@ -41,6 +42,17 @@
     "android": {
       "debugApplicationIdSuffix": ".debug",
       "minSdkVersion": 24
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IENDMjlBM0JFM0ZEMEI0MEQKUldRTnROQS92cU1wekJRT3U3cHlRS1RkNFZGenhxVmUzNkQwRnNFTnZhSnk3YlpNQ0pIbGpseDMK",
+      "endpoints": [
+        "https://github.com/KaReeeeeeeeEM/chessquest/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
     }
   }
 }

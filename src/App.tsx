@@ -31,6 +31,7 @@ import { loadGames, type SavedGame } from "./features/game/review";
 import { tipForDay } from "./features/tips/tips";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { BookImporter } from "./features/library/BookImporter";
+import { AppUpdater } from "./features/update/AppUpdater";
 import {
   loadImportedBooks,
   saveImportedBooks,
@@ -666,6 +667,7 @@ export default function App() {
           />
         </nav>
         <div className="sidebar-foot">
+          <AppUpdater />
           <div
             className={`streak ${pagesToday ? "streak--active" : ""} ${streakMilestone ? "streak--milestone" : ""}`}
           >
@@ -784,6 +786,7 @@ export default function App() {
             sounds={soundStyle !== "silent"}
             onSound={(kind) => playChessSound(kind, soundStyle)}
             onGameSaved={setCompletedGames}
+            onReviewRequested={() => setView("review")}
           />
         )}
       </main>

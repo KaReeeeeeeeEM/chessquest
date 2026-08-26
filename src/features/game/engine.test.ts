@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Chess } from "chess.js";
-import { chooseComputerMove, evaluatePosition } from "./engine";
+import { chooseComputerMove, computerThinkDelay, evaluatePosition } from "./engine";
 
 describe("local chess engine", () => {
   it("evaluates the initial material as equal", () => {
@@ -14,5 +14,11 @@ describe("local chess engine", () => {
     const move = chooseComputerMove(game, "beginner");
     expect(move).toBeDefined();
     expect(legalMoves).toContain(move?.san);
+  });
+
+  it("uses a visible, speed-aware thinking delay", () => {
+    expect(computerThinkDelay("beginner", "bullet", false, () => 0)).toBe(650);
+    expect(computerThinkDelay("club", "rapid", false, () => 1)).toBe(2510);
+    expect(computerThinkDelay("expert", "classical", true, () => 1)).toBe(2920);
   });
 });
