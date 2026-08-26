@@ -19,7 +19,12 @@ writeFileSync(
 
 let gradle = readFileSync(gradlePath, "utf8");
 if (!gradle.includes('create("release")')) {
-  gradle = `import java.io.FileInputStream\nimport java.util.Properties\n${gradle}`;
+  if (!gradle.includes("import java.io.FileInputStream")) {
+    gradle = `import java.io.FileInputStream\n${gradle}`;
+  }
+  if (!gradle.includes("import java.util.Properties")) {
+    gradle = `import java.util.Properties\n${gradle}`;
+  }
   const buildTypesAnchor = "    buildTypes {";
   const signingConfig = `    signingConfigs {\n        create("release") {\n            val propertiesFile = rootProject.file("keystore.properties")\n            val properties = Properties().apply {\n                FileInputStream(propertiesFile).use { load(it) }\n            }\n            keyAlias = properties["keyAlias"] as String\n            keyPassword = properties["keyPassword"] as String\n            storeFile = file(properties["storeFile"] as String)\n            storePassword = properties["storePassword"] as String\n        }\n    }\n\n`;
   if (!gradle.includes(buildTypesAnchor)) throw new Error("Android buildTypes block was not found.");
