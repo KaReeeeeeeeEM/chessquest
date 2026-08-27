@@ -111,6 +111,17 @@ export function Checkers() {
     () => localStorage.setItem("cq-checkers-variant", variant),
     [variant],
   );
+  if (started) {
+    return (
+      <div className="checkers-match-screen mount">
+        <CheckersGame
+          variant={variant}
+          difficulty={difficulty}
+          onExit={() => setStarted(false)}
+        />
+      </div>
+    );
+  }
   return (
     <div className="checkers-page mount">
       <header className="checkers-hero">
@@ -264,15 +275,10 @@ export function Checkers() {
               </label>
             </div>
             <VariantRules variant={variant} />
-            {!started && (
-              <Button onClick={() => setStarted(true)}>
-                I understand—start match
-              </Button>
-            )}
+            <Button className="checkers-start-action" onClick={() => setStarted(true)}>
+              Start match
+            </Button>
           </section>
-          {started && (
-            <CheckersGame variant={variant} difficulty={difficulty} />
-          )}
         </div>
       )}
     </div>
@@ -312,9 +318,11 @@ function VariantRules({ variant }: { variant: CheckersVariant }) {
 function CheckersGame({
   variant,
   difficulty,
+  onExit,
 }: {
   variant: CheckersVariant;
   difficulty: CheckersDifficulty;
+  onExit: () => void;
 }) {
   const [board, setBoard] = useState<CheckersBoard>(() =>
     createCheckersBoard(variant),
@@ -373,21 +381,30 @@ function CheckersGame({
                 : "Your move · light pieces"}
           </h3>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => {
-            setBoard(createCheckersBoard(variant));
-            setTurn("light");
-            setSelected(null);
-          }}
-        >
-          <RotateCcw />
-          Restart
-        </Button>
+        <div className="checkers-game-actions">
+          <Button variant="outline" onClick={onExit}>
+            <ChevronLeft data-icon="inline-start" />
+            Back to match setup
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setBoard(createCheckersBoard(variant));
+              setTurn("light");
+              setSelected(null);
+            }}
+          >
+            <RotateCcw data-icon="inline-start" />
+            Restart match
+          </Button>
+        </div>
       </div>
       <div
         className="checkers-board"
-        style={{ gridTemplateColumns: `repeat(${size}, 1fr)` }}
+        style={{
+          gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))`,
+          gridTemplateRows: `repeat(${size}, minmax(0, 1fr))`,
+        }}
         role="grid"
         aria-label={`${CHECKERS_RULES[variant].name} checkers board`}
       >
