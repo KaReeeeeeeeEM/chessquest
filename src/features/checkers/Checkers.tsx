@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { PageFlip } from "page-flip";
 import {
   BookOpen,
-  Brain,
   Check,
   ChevronLeft,
   ChevronRight,
   Crown,
   RotateCcw,
-  ShieldCheck,
   Swords,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -104,7 +103,6 @@ export function Checkers({
   onSound: (kind: "move" | "capture" | "checkmate" | "win") => void;
 }) {
   const [tab, setTab] = useState<"course" | "play">("course");
-  const [module, setModule] = useState(0);
   const [variant, setVariant] = useState<CheckersVariant>(
     () =>
       (localStorage.getItem("cq-checkers-variant") as CheckersVariant) ||
@@ -159,77 +157,7 @@ export function Checkers({
         </div>
       </header>
       {tab === "course" ? (
-        <div className="checkers-course-layout">
-          <nav
-            className="checkers-modules"
-            aria-label="Checkers course modules"
-          >
-            {modules.map((item, index) => (
-              <button
-                key={item.title}
-                className={module === index ? "active" : ""}
-                onClick={() => setModule(index)}
-              >
-                <span>{String(index + 1).padStart(2, "0")}</span>
-                <div>
-                  <small>{item.level}</small>
-                  <strong>{item.title}</strong>
-                </div>
-                <ChevronRight />
-              </button>
-            ))}
-          </nav>
-          <article className="checkers-book" aria-labelledby="checkers-lesson-title">
-            <div className="checkers-book-spread">
-              <section className="checkers-book-page checkers-book-page--lesson">
-                <span className="pill">
-                  Module {module + 1} · {modules[module].level}
-                </span>
-                <h3 id="checkers-lesson-title">{modules[module].title}</h3>
-                <p className="checkers-book-copy">{modules[module].copy}</p>
-                <div className="checkers-book-page-number" aria-hidden="true">
-                  {module * 2 + 1}
-                </div>
-              </section>
-              <section className="checkers-book-page checkers-book-page--notes" aria-label="Lesson notes">
-                <div className="practice-callout">
-                  <Brain />
-                  <div>
-                    <strong>Deliberate-practice prompt</strong>
-                    <p>{modules[module].drill}</p>
-                  </div>
-                </div>
-                <div className="course-source">
-                  <ShieldCheck />
-                  <div>
-                    <strong>Rule-grounded course</strong>
-                    <p>
-                      Rules profiles follow the{" "}
-                      <a href="https://wcdf.net/rules/rules_of_checkers_english.pdf" target="_blank" rel="noreferrer">WCDF Laws of Checkers</a>
-                      {" "}and{" "}
-                      <a href="https://www.fmjd.org/downloads/64cb/Official_Rules_of_the_game_in_64_classic_draughts.pdf" target="_blank" rel="noreferrer">FMJD Draughts-64 rules</a>.
-                      Strategy explanations and drills are original ChessQuest instruction.
-                    </p>
-                  </div>
-                </div>
-                <div className="checkers-book-page-number" aria-hidden="true">
-                  {module * 2 + 2}
-                </div>
-              </section>
-            </div>
-            <footer className="checkers-book-controls">
-              <Button variant="outline" disabled={module === 0} onClick={() => setModule((value) => value - 1)}>
-                <ChevronLeft data-icon="inline-start" />
-                Previous
-              </Button>
-              <span>Module {module + 1} of {modules.length}</span>
-              <Button disabled={module === modules.length - 1} onClick={() => setModule((value) => value + 1)}>
-                Next module
-                <ChevronRight data-icon="inline-end" />
-              </Button>
-            </footer>
-          </article>
-        </div>
+        <CheckersCourseBook />
       ) : (
         <div className="checkers-play-layout">
           <section className="checkers-setup card">
@@ -290,6 +218,120 @@ export function Checkers({
         </div>
       )}
     </div>
+  );
+}
+
+function CheckersCourseBook() {
+  const [page, setPage] = useState(0);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const flipRef = useRef<PageFlip | null>(null);
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const host = document.createElement("div");
+    host.className = "reader-flip-book";
+    stage.replaceChildren(host);
+
+    modules.forEach((item, index) => {
+      const sheet = document.createElement("section");
+      sheet.className = "reader-flip-page checkers-flip-page";
+
+      const runningHead = document.createElement("header");
+      runningHead.className = "reader-running-head";
+      const bookName = document.createElement("span");
+      bookName.textContent = "ChessQuest Checkers Course";
+      const level = document.createElement("span");
+      level.textContent = item.level;
+      runningHead.append(bookName, level);
+
+      const scroll = document.createElement("div");
+      scroll.className = "reader-page-scroll";
+      const title = document.createElement("div");
+      title.className = "reader-title-block";
+      const eyebrow = document.createElement("span");
+      eyebrow.className = "eyebrow";
+      eyebrow.textContent = `LESSON ${index + 1}`;
+      const heading = document.createElement("h2");
+      heading.textContent = item.title;
+      const ornament = document.createElement("div");
+      ornament.className = "reader-ornament";
+      ornament.setAttribute("aria-hidden", "true");
+      ornament.innerHTML = "<i></i><span>●</span><i></i>";
+      title.append(eyebrow, heading, ornament);
+
+      const prose = document.createElement("div");
+      prose.className = "reader-prose checkers-flip-prose";
+      const copy = document.createElement("p");
+      copy.textContent = item.copy;
+      const prompt = document.createElement("aside");
+      prompt.className = "checkers-flip-prompt";
+      const promptTitle = document.createElement("strong");
+      promptTitle.textContent = "Practice before turning the page";
+      const promptCopy = document.createElement("p");
+      promptCopy.textContent = item.drill;
+      prompt.append(promptTitle, promptCopy);
+      prose.append(copy, prompt);
+      scroll.append(title, prose);
+
+      const folio = document.createElement("footer");
+      folio.className = "reader-folio";
+      folio.setAttribute("aria-label", `Course page ${index + 1}`);
+      const pageNumber = document.createElement("span");
+      pageNumber.textContent = String(index + 1);
+      folio.append(pageNumber);
+      sheet.append(runningHead, scroll, folio);
+      host.append(sheet);
+    });
+
+    const flipBook = new PageFlip(host, {
+      width: 560,
+      height: 760,
+      size: "stretch",
+      minWidth: 280,
+      maxWidth: 560,
+      minHeight: 380,
+      maxHeight: 760,
+      startPage: page,
+      flippingTime: 720,
+      drawShadow: true,
+      maxShadowOpacity: 0.35,
+      showCover: false,
+      usePortrait: true,
+      autoSize: true,
+      mobileScrollSupport: true,
+      clickEventForward: false,
+      useMouseEvents: true,
+      showPageCorners: true,
+      disableFlipByClick: true,
+    });
+    flipBook.loadFromHTML(host.querySelectorAll<HTMLElement>(".reader-flip-page"));
+    flipBook.on("flip", (event) => setPage(event.data));
+    flipRef.current = flipBook;
+    return () => {
+      flipRef.current = null;
+      flipBook.destroy();
+      stage.replaceChildren();
+    };
+  }, []);
+
+  return (
+    <article className="reader-page checkers-course-reader" aria-label="Interactive checkers course book">
+      <div className="reader-flip-shell">
+        <div className="reader-flip-stage" ref={stageRef} />
+      </div>
+      <footer className="reader-next checkers-reader-controls">
+        <Button variant="outline" disabled={page === 0} onClick={() => flipRef.current?.flipPrev("top")}>
+          <ChevronLeft data-icon="inline-start" />
+          Previous page
+        </Button>
+        <span>Page {page + 1} of {modules.length}</span>
+        <Button disabled={page === modules.length - 1} onClick={() => flipRef.current?.flipNext("top")}>
+          Next page
+          <ChevronRight data-icon="inline-end" />
+        </Button>
+      </footer>
+    </article>
   );
 }
 

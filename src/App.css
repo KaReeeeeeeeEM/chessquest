@@ -2167,6 +2167,15 @@ blockquote {
 .checkers-book-controls { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding: 18px 24px; border-top: 1px solid var(--border); }
 .checkers-book-controls > span { color: var(--muted); font-size: 13px; font-weight: 800; text-align: center; }
 .checkers-book-controls > [data-slot="button"]:last-child { justify-self: end; }
+.checkers-course-reader { max-width: 1200px; }
+.checkers-course-reader .reader-flip-shell { padding-top: 20px; background: color-mix(in srgb, var(--primary) 6%, var(--bg)); }
+.checkers-flip-page .reader-title-block { margin-bottom: 42px; }
+.checkers-flip-prose { max-width: 39ch; margin-inline: auto; }
+.checkers-flip-prose > p { margin: 0; font-family: Georgia, serif; line-height: 1.82; }
+.checkers-flip-prompt { margin-top: 40px; padding: 20px 22px; border-block: 1px solid var(--border); background: color-mix(in srgb, var(--soft) 54%, transparent); }
+.checkers-flip-prompt strong { display: block; color: var(--primary); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+.checkers-flip-prompt p { margin: 8px 0 0; color: var(--muted); font-size: 15px !important; line-height: 1.65; }
+.checkers-reader-controls { margin-top: 16px; }
 .checkers-play-layout { display: grid; gap: 20px; }
 .checkers-setup { padding: clamp(24px, 4vw, 40px); }
 .checkers-start-action { min-height: 48px; padding-inline: 22px; background: var(--primary); color: var(--surface); font-weight: 850; }
@@ -2216,6 +2225,8 @@ blockquote {
   .checkers-book-page--lesson { justify-content: flex-start; }
   .checkers-book-controls { grid-template-columns: 1fr 1fr; padding: 14px; }
   .checkers-book-controls > span { display: none; }
+  .checkers-reader-controls { gap: 10px; }
+  .checkers-reader-controls > [data-slot="button"] { min-width: 0; padding-inline: 12px; }
   .segmented { width: 100%; }
   .segmented button { flex: 1; justify-content: center; }
   .checkers-game-head { align-items: stretch; flex-direction: column; }

@@ -78,9 +78,9 @@ jobs:
           tagName: v__VERSION__
           releaseName: ChessQuest __VERSION__
           releaseBody: |
-            ChessQuest 0.9.2 adds responsive book-style checkers lessons, separate match setup and gameplay screens, consistently square chess and checkers tiles, and clearer primary actions.
+            ChessQuest 0.9.3 turns the checkers course into the same focused StPageFlip HTML reading experience used for imported EPUB books.
 
-            Checkers now includes move, capture, victory, and defeat audio feedback plus a fifth Spanish ruleset with forward-only man captures and flying kings.
+            The always-visible module list is removed. Lessons now appear on animated paper pages with running heads, folios, reading-width typography, embedded practice prompts, and clear previous/next page controls.
 
             Choose the installer for your operating system from the assets below.
           releaseDraft: true
