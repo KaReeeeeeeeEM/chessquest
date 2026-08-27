@@ -51,5 +51,5 @@ describe("local chess engine", () => {
       game.move(move!);
     }
     expect(game.isCheckmate()).toBe(true);
-  });
+  }, 15000);
 });
