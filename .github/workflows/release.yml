@@ -78,9 +78,9 @@ jobs:
           tagName: v__VERSION__
           releaseName: ChessQuest __VERSION__
           releaseBody: |
-            ChessQuest 0.9.1 keeps the complete chess board visible during play by using a standard 640-pixel maximum and scaling against the available window height.
+            ChessQuest 0.9.2 adds responsive book-style checkers lessons, separate match setup and gameplay screens, consistently square chess and checkers tiles, and clearer primary actions.
 
-            Game review boards follow the same responsive sizing, with playback controls centered to the board width across laptop, tablet, and mobile layouts.
+            Checkers now includes move, capture, victory, and defeat audio feedback plus a fifth Spanish ruleset with forward-only man captures and flying kings.
 
             Choose the installer for your operating system from the assets below.
           releaseDraft: true

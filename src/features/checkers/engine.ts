@@ -1,4 +1,4 @@
-export type CheckersVariant = "american" | "international" | "brazilian" | "russian";
+export type CheckersVariant = "american" | "international" | "brazilian" | "russian" | "spanish";
 export type CheckersDifficulty = "beginner" | "casual" | "club" | "expert";
 export type CheckersPlayer = "light" | "dark";
 export type CheckersPiece = { player: CheckersPlayer; king: boolean };
@@ -10,6 +10,7 @@ export const CHECKERS_RULES = {
   international: { name: "International", size: 10, rows: 4, flyingKings: true, backwardMen: true, maximumCapture: true, crownContinues: true },
   brazilian: { name: "Brazilian", size: 8, rows: 3, flyingKings: true, backwardMen: true, maximumCapture: true, crownContinues: true },
   russian: { name: "Russian", size: 8, rows: 3, flyingKings: true, backwardMen: true, maximumCapture: false, crownContinues: true },
+  spanish: { name: "Spanish", size: 8, rows: 3, flyingKings: true, backwardMen: false, maximumCapture: true, crownContinues: false },
 } as const;
 
 const directions = [[-1, -1], [-1, 1], [1, -1], [1, 1]] as const;

@@ -796,7 +796,12 @@ export default function App() {
           />
         )}{" "}
         {view === "lesson" && <ChessFoundations />}{" "}
-        {view === "checkers" && <Checkers />}{" "}
+        {view === "checkers" && (
+          <Checkers
+            sounds={soundStyle !== "silent"}
+            onSound={(kind) => playChessSound(kind, soundStyle)}
+          />
+        )}{" "}
         {view === "library" && (
           <LibraryView
             onRead={openBook}
@@ -977,8 +982,8 @@ function SettingsView({
         </div>
         <div className="setting-row">
           <div>
-            <label htmlFor="sound-choice"><strong>Chess sounds</strong></label>
-            <small>Choose the character of move and capture feedback.</small>
+            <label htmlFor="sound-choice"><strong>Game sounds</strong></label>
+            <small>Choose the sound style for chess and checkers moves, captures, and results.</small>
           </div>
           <Select value={soundStyle} onValueChange={(value) => onSoundChange(value as SoundStyle)}><SelectTrigger id="sound-choice" className="setting-control"><SelectValue>{soundStyle === "classic" ? "Classic board" : soundStyle === "soft" ? "Soft focus" : "Silent"}</SelectValue></SelectTrigger><SelectContent><SelectGroup><SelectItem value="classic">Classic board</SelectItem><SelectItem value="soft">Soft focus</SelectItem><SelectItem value="silent">Silent</SelectItem></SelectGroup></SelectContent></Select>
         </div>

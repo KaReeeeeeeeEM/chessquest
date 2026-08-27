@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   BookOpen,
   Brain,
@@ -84,7 +84,7 @@ const modules = [
   {
     title: "Variant laboratory",
     level: "Rules",
-    copy: "Play the same position under all four profiles. Notice backward man captures, flying-king range, maximum-capture selection, and whether crowning ends a jump.",
+    copy: "Play the same position under all five profiles. Notice forward-only versus backward man captures, flying-king range, maximum-capture selection, and whether crowning ends a jump.",
     drill: "Read the rule card before every variant switch.",
   },
   {
@@ -96,7 +96,13 @@ const modules = [
   },
 ] as const;
 
-export function Checkers() {
+export function Checkers({
+  sounds,
+  onSound,
+}: {
+  sounds: boolean;
+  onSound: (kind: "move" | "capture" | "checkmate" | "win") => void;
+}) {
   const [tab, setTab] = useState<"course" | "play">("course");
   const [module, setModule] = useState(0);
   const [variant, setVariant] = useState<CheckersVariant>(
@@ -118,6 +124,8 @@ export function Checkers() {
           variant={variant}
           difficulty={difficulty}
           onExit={() => setStarted(false)}
+          sounds={sounds}
+          onSound={onSound}
         />
       </div>
     );
@@ -319,10 +327,14 @@ function CheckersGame({
   variant,
   difficulty,
   onExit,
+  sounds,
+  onSound,
 }: {
   variant: CheckersVariant;
   difficulty: CheckersDifficulty;
   onExit: () => void;
+  sounds: boolean;
+  onSound: (kind: "move" | "capture" | "checkmate" | "win") => void;
 }) {
   const [board, setBoard] = useState<CheckersBoard>(() =>
     createCheckersBoard(variant),
@@ -330,6 +342,7 @@ function CheckersGame({
   const [turn, setTurn] = useState<"light" | "dark">("light");
   const [selected, setSelected] = useState<number | null>(null);
   const [thinking, setThinking] = useState(false);
+  const soundedWinner = useRef<string | null>(null);
   const legal = useMemo(
     () => legalCheckersMoves(board, turn, variant),
     [board, turn, variant],
@@ -340,13 +353,20 @@ function CheckersGame({
     setThinking(true);
     const timer = window.setTimeout(() => {
       const move = chooseCheckersMove(board, "dark", variant, difficulty);
-      if (move)
+      if (move) {
         setBoard((position) => applyCheckersMove(position, move, variant));
+        if (sounds) onSound(move.captures.length ? "capture" : "move");
+      }
       setTurn("light");
       setThinking(false);
     }, { beginner: 900, casual: 1300, club: 1800, expert: 2400 }[difficulty]);
     return () => window.clearTimeout(timer);
-  }, [board, difficulty, turn, variant, winner]);
+  }, [board, difficulty, onSound, sounds, turn, variant, winner]);
+  useEffect(() => {
+    if (!winner || soundedWinner.current === winner) return;
+    soundedWinner.current = winner;
+    if (sounds) onSound(winner === "You" ? "win" : "checkmate");
+  }, [onSound, sounds, winner]);
   function choose(index: number) {
     if (turn !== "light" || winner) return;
     if (selected === null) {
@@ -358,6 +378,7 @@ function CheckersGame({
     );
     if (move) {
       setBoard(applyCheckersMove(board, move, variant));
+      if (sounds) onSound(move.captures.length ? "capture" : "move");
       setTurn("dark");
       setSelected(null);
     } else
@@ -392,6 +413,7 @@ function CheckersGame({
               setBoard(createCheckersBoard(variant));
               setTurn("light");
               setSelected(null);
+              soundedWinner.current = null;
             }}
           >
             <RotateCcw data-icon="inline-start" />

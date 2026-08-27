@@ -1,6 +1,6 @@
 [package]
 name = "chessquest"
-version = "0.9.1"
+version = "0.9.2"
 description = "An interactive, local-first chess book learning application"
 authors = ["Chess Interactive Club"]
 license = ""

@@ -19,9 +19,19 @@ describe("checkers engine", () => {
     expect(applyCheckersMove(board, { from: 9, to: 0, captures: [] }, "american")[0]?.king).toBe(true);
   });
   it("offers all configured variants and a legal computer choice", () => {
-    expect(Object.keys(CHECKERS_RULES)).toEqual(["american", "international", "brazilian", "russian"]);
+    expect(Object.keys(CHECKERS_RULES)).toEqual(["american", "international", "brazilian", "russian", "spanish"]);
     const board = createCheckersBoard("brazilian");
     const move = chooseCheckersMove(board, "dark", "brazilian", "club", () => 0);
     expect(legalCheckersMoves(board, "dark", "brazilian")).toContainEqual(move);
+  });
+  it("uses forward-only man captures and flying kings in Spanish draughts", () => {
+    const manBoard: CheckersBoard = Array(64).fill(null);
+    manBoard[26] = { player: "light", king: false };
+    manBoard[35] = { player: "dark", king: false };
+    expect(legalCheckersMoves(manBoard, "light", "spanish")).not.toContainEqual({ from: 26, to: 44, captures: [35] });
+
+    const kingBoard: CheckersBoard = Array(64).fill(null);
+    kingBoard[42] = { player: "light", king: true };
+    expect(legalCheckersMoves(kingBoard, "light", "spanish")).toContainEqual({ from: 42, to: 7, captures: [] });
   });
 });
