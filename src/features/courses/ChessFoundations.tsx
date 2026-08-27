@@ -222,7 +222,7 @@ export function ChessFoundations() {
           disabled={step === 0}
           onClick={() => setStep((value) => value - 1)}
         >
-          <ChevronLeft />
+          <ChevronLeft data-icon="inline-start" />
           Back
         </Button>
         <span>{lessons[step]}</span>
@@ -231,7 +231,7 @@ export function ChessFoundations() {
           onClick={() => setStep((value) => value + 1)}
         >
           Continue
-          <ChevronRight />
+          <ChevronRight data-icon="inline-end" />
         </Button>
       </footer>
     </div>

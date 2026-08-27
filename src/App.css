@@ -481,6 +481,42 @@ nav,
   opacity: 0.45;
   cursor: not-allowed;
 }
+[data-slot="button"] {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 15px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: var(--primary);
+  color: var(--surface);
+  font: inherit;
+  font-weight: 650;
+  line-height: 1;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+}
+[data-slot="button"] svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  flex: 0 0 18px;
+}
+[data-slot="button"][data-variant="outline"] {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--fg);
+}
+[data-slot="button"][data-variant="outline"]:hover {
+  background: var(--soft);
+}
+[data-slot="button"]:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
 .button,
 .nav-button,
 .collapse-button,
