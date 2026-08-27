@@ -61,9 +61,10 @@ export function computerThinkDelay(
   watching: boolean,
   random = Math.random,
 ) {
-  const base = { bullet: 650, blitz: 900, rapid: 1250, classical: 1650 }[speed];
-  const depthPause = { beginner: 0, casual: 180, club: 360, expert: 620 }[difficulty];
-  return Math.round(base + depthPause + random() * (watching ? 650 : 900));
+  const base = { bullet: 1800, blitz: 3500, rapid: 6000, classical: 9000 }[speed];
+  const depthPause = { beginner: 0, casual: 1200, club: 2500, expert: 4500 }[difficulty];
+  const variablePause = random() * (watching ? 2500 : 4000);
+  return Math.round(base + depthPause + variablePause);
 }
 
 function search(game: Chess, depth: number, alpha: number, beta: number): number {

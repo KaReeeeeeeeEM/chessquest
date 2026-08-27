@@ -13,6 +13,17 @@
   --accent: #d7a84a;
   --radius: 18px;
 }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 :root[data-font="geist"] {
   font-family: "Geist Variable", system-ui, sans-serif;
 }
@@ -1340,7 +1351,11 @@ blockquote {
   font-weight: 800;
   color: var(--primary);
 }
-.computer-game,
+.computer-game {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+}
 .game-analysis {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
@@ -1759,7 +1774,14 @@ blockquote {
 .widget-gallery-copy h3 { margin: 12px 0 0; font-size: 24px; }
 .widget-size-pill { display: inline-flex; margin-top: 18px; padding: 6px 10px; border-radius: 999px; background: var(--soft); color: var(--primary); font-size: 12px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
 .widget-install-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
-.widget-native-status { max-width: 58ch; margin: 14px 0 0; padding: 12px 14px; border: 1px solid var(--border); border-radius: 13px; background: var(--soft); color: var(--muted); font-size: 13px; line-height: 1.5; }
+.widget-native-status { max-width: 58ch; margin: 14px 0 0; padding: 14px 16px; border: 1px solid var(--border); border-radius: 13px; background: var(--soft); color: var(--muted); font-size: 13px; line-height: 1.5; }
+.widget-native-status > strong { display: block; color: var(--fg); font-size: 14px; }
+.widget-native-status p { margin: 5px 0 0; }
+.widget-native-status details { margin-top: 10px; }
+.widget-native-status summary { display: flex; align-items: center; gap: 7px; color: var(--fg); font-weight: 850; cursor: pointer; }
+.widget-native-status summary svg { width: 17px; height: 17px; }
+.widget-native-status ol { margin: 12px 0; padding-left: 22px; }
+.widget-native-status li + li { margin-top: 6px; }
 .widget-native-status--ready { border-color: color-mix(in srgb, var(--primary) 45%, var(--border)); color: var(--primary); }
 .widget-native-status--error { border-color: color-mix(in srgb, #a3482c 45%, var(--border)); color: #a3482c; }
 .widget-carousel { min-width: 0; display: grid; justify-items: center; gap: 22px; }

@@ -1156,6 +1156,12 @@ function WidgetGallery({ selected, onSelect, streak, pagesToday }: { selected: s
   const [index, setIndex] = useState(initial);
   const [nativeStatus, setNativeStatus] = useState<"idle" | "syncing" | "ready" | "web" | "error">("idle");
   const option = widgetOptions[index];
+  const platform = /Android/i.test(navigator.userAgent) ? "android" : /Mac/i.test(navigator.platform) ? "macos" : /Win/i.test(navigator.platform) ? "windows" : "linux";
+  const recoverySteps = platform === "macos"
+    ? ["Quit and reopen the installed ChessQuest app once after updating.", "Open Notification Centre, choose Edit Widgets, then search for ChessQuest.", "If ChessQuest is missing, reinstall the latest signed macOS release so its WidgetKit extension is registered."]
+    : platform === "android"
+      ? ["Return to the home screen and long-press an empty area.", "Choose Widgets, find ChessQuest, then drag your preferred size onto the home screen.", "If ChessQuest is missing, open the app once after installing the latest APK and try again."]
+      : ["Keep ChessQuest running while the desktop widget is open.", "Try Add to device widgets again after restarting the installed app.", "If it still fails, reinstall the latest ChessQuest release for your operating system."];
   function move(direction: number) { setIndex((value) => (value + direction + widgetOptions.length) % widgetOptions.length); }
   async function addToDevice() {
     setNativeStatus("syncing");
@@ -1171,7 +1177,17 @@ function WidgetGallery({ selected, onSelect, streak, pagesToday }: { selected: s
     }
   }
   return <div className="widget-gallery mount">
-    <section className="widget-gallery-copy"><span className="eyebrow">OS WIDGET GALLERY</span><h2>Keep chess within sight</h2><p>Choose the ChessQuest widget that appears in your device’s widget gallery. Real reading and streak data stays synchronized from this app.</p><div className="widget-size-pill">{option.size}</div><h3>{option.name}</h3><p>{option.size === "Small" ? "A single focused signal." : option.size === "Medium" ? "More context without taking over your day." : "Your reading and practice rhythm in one view."}</p><div className="widget-install-actions"><Button variant="outline" onClick={() => onSelect(option.id)}>{selected === option.id ? <Check /> : <LayoutGrid />}{selected === option.id ? "Selected in ChessQuest" : "Use in ChessQuest"}</Button><Button onClick={() => void addToDevice()} disabled={nativeStatus === "syncing"}><LayoutGrid />{nativeStatus === "syncing" ? "Preparing widget…" : "Add to device widgets"}</Button></div>{nativeStatus !== "idle" && <p className={`widget-native-status widget-native-status--${nativeStatus}`} role="status">{nativeStatus === "ready" ? "Widget data is ready. On macOS, open Edit Widgets and choose ChessQuest. Android will offer to pin it when supported; Windows and Linux open a persistent desktop widget." : nativeStatus === "web" ? "Install the ChessQuest app first to add an operating-system widget." : nativeStatus === "error" ? "The device widget could not be prepared. Check the installed app permissions and try again." : "Preparing the native widget…"}</p>}</section>
+    <section className="widget-gallery-copy">
+      <span className="eyebrow">OS WIDGET GALLERY</span><h2>Keep chess within sight</h2><p>Choose the ChessQuest widget that appears in your device’s widget gallery. Real reading and streak data stays synchronized from this app.</p>
+      <div className="widget-size-pill">{option.size}</div><h3>{option.name}</h3><p>{option.size === "Small" ? "A single focused signal." : option.size === "Medium" ? "More context without taking over your day." : "Your reading and practice rhythm in one view."}</p>
+      <div className="widget-install-actions"><Button variant="outline" onClick={() => onSelect(option.id)}>{selected === option.id ? <Check /> : <LayoutGrid />}{selected === option.id ? "Selected in ChessQuest" : "Use in ChessQuest"}</Button><Button onClick={() => void addToDevice()} disabled={nativeStatus === "syncing"}><LayoutGrid />{nativeStatus === "syncing" ? "Preparing widget…" : "Add to device widgets"}</Button></div>
+      {nativeStatus !== "idle" && <div className={`widget-native-status widget-native-status--${nativeStatus}`} role="status">
+        <strong>{nativeStatus === "ready" ? "Widget prepared" : nativeStatus === "web" ? "Installed app required" : nativeStatus === "error" ? "ChessQuest could not register the widget" : "Preparing the native widget…"}</strong>
+        {nativeStatus === "ready" && <p>{platform === "macos" ? "Open Notification Centre → Edit Widgets and choose ChessQuest." : platform === "android" ? "Use the home-screen widget picker to place ChessQuest." : "The persistent ChessQuest desktop widget is now open."}</p>}
+        {nativeStatus === "web" && <p>Open this page inside the installed ChessQuest application, then try again.</p>}
+        {nativeStatus === "error" && <details><summary><CircleHelp /> How to fix this on {platform === "macos" ? "macOS" : platform === "android" ? "Android" : platform === "windows" ? "Windows" : "Linux"}</summary><ol>{recoverySteps.map((step) => <li key={step}>{step}</li>)}</ol><Button variant="outline" onClick={() => void addToDevice()}>Try again</Button></details>}
+      </div>}
+    </section>
     <section className="widget-carousel" aria-roledescription="carousel" aria-label="Widget previews">
       <div className="widget-device"><div className="widget-device-time">9:41</div><WidgetPreview key={option.id} id={option.id} streak={streak} pagesToday={pagesToday} /></div>
       <div className="widget-carousel-controls"><button aria-label="Previous widget" onClick={() => move(-1)}><ChevronLeft /></button><div>{widgetOptions.map((item, dot) => <button key={item.id} aria-label={`Show ${item.name}`} aria-current={dot === index ? "true" : undefined} className={dot === index ? "active" : ""} onClick={() => setIndex(dot)} />)}</div><button aria-label="Next widget" onClick={() => move(1)}><ChevronRight /></button></div>

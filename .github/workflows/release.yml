@@ -78,9 +78,9 @@ jobs:
           tagName: v__VERSION__
           releaseName: ChessQuest __VERSION__
           releaseBody: |
-            ChessQuest 0.7.0 brings reading widgets beyond the in-app preview. macOS builds now include a native WidgetKit extension, Android builds expose an AppWidget pinning flow, and Windows/Linux users can open the same live reading widget as a persistent desktop surface.
+            ChessQuest 0.7.1 gives the computer substantially longer, variable, game-speed-aware thinking pauses so replies feel considered instead of preloaded.
 
-            The widget displays real daily-page and streak progress stored by ChessQuest, supports small, medium, and large layouts, and follows light or dark system appearance.
+            Active matches now focus on the board without the Coach Rook side panel. Widget registration failures include clear, platform-specific recovery steps for macOS, Android, Windows, and Linux.
 
             Choose the installer for your operating system from the assets below.
           releaseDraft: true

@@ -17,9 +17,9 @@ describe("local chess engine", () => {
   });
 
   it("uses a visible, speed-aware thinking delay", () => {
-    expect(computerThinkDelay("beginner", "bullet", false, () => 0)).toBe(650);
-    expect(computerThinkDelay("club", "rapid", false, () => 1)).toBe(2510);
-    expect(computerThinkDelay("expert", "classical", true, () => 1)).toBe(2920);
+    expect(computerThinkDelay("beginner", "bullet", false, () => 0)).toBe(1800);
+    expect(computerThinkDelay("club", "rapid", false, () => 1)).toBe(12500);
+    expect(computerThinkDelay("expert", "classical", true, () => 1)).toBe(16000);
   });
 
   it("varies legal replies from an offline master-opening repertoire", () => {

@@ -238,12 +238,7 @@ export function ComputerGame({ name, recommended, sounds, onSound, onGameSaved, 
           </>
         )}
       </section>
-      <aside className={`bot-card card ${thinking ? "bot-card--thinking" : ""}`} aria-live="polite">
-        <div className="bot-face"><GraduationCap /></div>
-        <span className="eyebrow">Coach Rook</span>
-        <h3>{thinking ? "Thinking…" : "Watching the board"}</h3>
-        <p>{comment}</p>
-      </aside>
+      <p className="sr-only" aria-live="polite">{thinking ? "The computer is thinking." : comment}</p>
     </div>
   );
 }
