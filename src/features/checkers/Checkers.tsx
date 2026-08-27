@@ -3,6 +3,7 @@ import {
   BookOpen,
   Brain,
   Check,
+  ChevronLeft,
   ChevronRight,
   Crown,
   RotateCcw,
@@ -159,39 +160,55 @@ export function Checkers() {
               </button>
             ))}
           </nav>
-          <article className="checkers-lesson card">
-            <span className="pill">
-              Module {module + 1} · {modules[module].level}
-            </span>
-            <h3>{modules[module].title}</h3>
-            <p>{modules[module].copy}</p>
-            <div className="practice-callout">
-              <Brain />
-              <div>
-                <strong>Deliberate-practice prompt</strong>
-                <p>{modules[module].drill}</p>
-              </div>
+          <article className="checkers-book" aria-labelledby="checkers-lesson-title">
+            <div className="checkers-book-spread">
+              <section className="checkers-book-page checkers-book-page--lesson">
+                <span className="pill">
+                  Module {module + 1} · {modules[module].level}
+                </span>
+                <h3 id="checkers-lesson-title">{modules[module].title}</h3>
+                <p className="checkers-book-copy">{modules[module].copy}</p>
+                <div className="checkers-book-page-number" aria-hidden="true">
+                  {module * 2 + 1}
+                </div>
+              </section>
+              <section className="checkers-book-page checkers-book-page--notes" aria-label="Lesson notes">
+                <div className="practice-callout">
+                  <Brain />
+                  <div>
+                    <strong>Deliberate-practice prompt</strong>
+                    <p>{modules[module].drill}</p>
+                  </div>
+                </div>
+                <div className="course-source">
+                  <ShieldCheck />
+                  <div>
+                    <strong>Rule-grounded course</strong>
+                    <p>
+                      Rules profiles follow the{" "}
+                      <a href="https://wcdf.net/rules/rules_of_checkers_english.pdf" target="_blank" rel="noreferrer">WCDF Laws of Checkers</a>
+                      {" "}and{" "}
+                      <a href="https://www.fmjd.org/downloads/64cb/Official_Rules_of_the_game_in_64_classic_draughts.pdf" target="_blank" rel="noreferrer">FMJD Draughts-64 rules</a>.
+                      Strategy explanations and drills are original ChessQuest instruction.
+                    </p>
+                  </div>
+                </div>
+                <div className="checkers-book-page-number" aria-hidden="true">
+                  {module * 2 + 2}
+                </div>
+              </section>
             </div>
-            <div className="course-source">
-              <ShieldCheck />
-              <div>
-                <strong>Rule-grounded course</strong>
-                <p>
-                Rules profiles follow the{" "}
-                <a href="https://wcdf.net/rules/rules_of_checkers_english.pdf" target="_blank" rel="noreferrer">WCDF Laws of Checkers</a>
-                {" "}and{" "}
-                <a href="https://www.fmjd.org/downloads/64cb/Official_Rules_of_the_game_in_64_classic_draughts.pdf" target="_blank" rel="noreferrer">FMJD Draughts-64 rules</a>.
-                Strategy explanations and drills are original ChessQuest instruction.
-                </p>
-              </div>
-            </div>
-            <Button
-              disabled={module === modules.length - 1}
-              onClick={() => setModule((value) => value + 1)}
-            >
-              Next module
-              <ChevronRight />
-            </Button>
+            <footer className="checkers-book-controls">
+              <Button variant="outline" disabled={module === 0} onClick={() => setModule((value) => value - 1)}>
+                <ChevronLeft data-icon="inline-start" />
+                Previous
+              </Button>
+              <span>Module {module + 1} of {modules.length}</span>
+              <Button disabled={module === modules.length - 1} onClick={() => setModule((value) => value + 1)}>
+                Next module
+                <ChevronRight data-icon="inline-end" />
+              </Button>
+            </footer>
           </article>
         </div>
       ) : (

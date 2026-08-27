@@ -2151,12 +2151,22 @@ blockquote {
 .checkers-modules small { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
 .checkers-modules strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .checkers-modules svg { width: 17px; }
-.checkers-lesson { min-height: 560px; display: flex; flex-direction: column; align-items: flex-start; padding: clamp(28px, 5vw, 56px); }
-.checkers-lesson > p { max-width: 62ch; color: var(--muted); font-size: 18px; line-height: 1.7; }
-.practice-callout, .course-source { width: 100%; display: flex; gap: 14px; margin-top: 18px; padding: 20px; border-radius: 16px; background: var(--soft); }
+.checkers-book { min-width: 0; overflow: hidden; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); box-shadow: 0 24px 54px color-mix(in srgb, var(--fg) 12%, transparent); }
+.checkers-book-spread { position: relative; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); min-height: 600px; }
+.checkers-book-spread::after { content: ""; position: absolute; inset-block: 0; left: 50%; width: 1px; background: var(--border); box-shadow: -10px 0 24px color-mix(in srgb, var(--fg) 8%, transparent), 10px 0 24px color-mix(in srgb, var(--fg) 8%, transparent); }
+.checkers-book-page { position: relative; min-width: 0; display: flex; flex-direction: column; padding: clamp(36px, 5vw, 72px) clamp(32px, 4vw, 60px) 52px; }
+.checkers-book-page--lesson { justify-content: center; }
+.checkers-book-page--notes { justify-content: center; gap: 24px; background: color-mix(in srgb, var(--soft) 28%, var(--surface)); }
+.checkers-book-page h3 { max-width: 12ch; margin: 20px 0 28px; font-family: Georgia, serif; font-size: clamp(34px, 4vw, 54px); line-height: 1.04; }
+.checkers-book-copy { max-width: 40ch; margin: 0; color: var(--muted); font-family: Georgia, serif; font-size: clamp(18px, 1.5vw, 22px); line-height: 1.8; }
+.checkers-book-page-number { position: absolute; inset-inline: 0; bottom: 22px; color: var(--muted); font-family: Georgia, serif; font-size: 13px; text-align: center; }
+.practice-callout, .course-source { width: 100%; display: flex; gap: 14px; padding: 22px; border-radius: 16px; background: var(--soft); }
 .practice-callout svg, .course-source svg { flex: 0 0 auto; color: var(--primary); }
-.practice-callout p, .course-source p { margin: 5px 0 0; color: var(--muted); }
-.checkers-lesson > .button { margin-top: auto; }
+.practice-callout p, .course-source p { margin: 7px 0 0; color: var(--muted); line-height: 1.65; }
+.course-source a { color: var(--primary); text-underline-offset: 3px; }
+.checkers-book-controls { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding: 18px 24px; border-top: 1px solid var(--border); }
+.checkers-book-controls > span { color: var(--muted); font-size: 13px; font-weight: 800; text-align: center; }
+.checkers-book-controls > [data-slot="button"]:last-child { justify-self: end; }
 .checkers-play-layout { display: grid; gap: 20px; }
 .checkers-setup { padding: clamp(24px, 4vw, 40px); }
 .checkers-selects { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -2182,8 +2192,10 @@ blockquote {
   .foundation-layout, .coordinate-quiz, .checkers-course-layout { grid-template-columns: 1fr; }
   .foundation-board { justify-self: center; }
   .checkers-modules { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .checkers-lesson { min-height: auto; }
-  .checkers-lesson > .button { margin-top: 28px; }
+  .checkers-book-spread { grid-template-columns: 1fr; }
+  .checkers-book-spread::after { display: none; }
+  .checkers-book-page { min-height: 460px; }
+  .checkers-book-page + .checkers-book-page { border-top: 1px solid var(--border); }
 }
 @media (max-width: 700px) {
   .course-hero, .checkers-hero { align-items: stretch; flex-direction: column; }
@@ -2193,6 +2205,10 @@ blockquote {
   .course-stage { min-height: 0; }
   .coordinate-answer { grid-template-columns: 1fr; }
   .course-controls > span { display: none; }
+  .checkers-book-page { min-height: auto; padding: 32px 24px 48px; }
+  .checkers-book-page--lesson { justify-content: flex-start; }
+  .checkers-book-controls { grid-template-columns: 1fr 1fr; padding: 14px; }
+  .checkers-book-controls > span { display: none; }
   .segmented { width: 100%; }
   .segmented button { flex: 1; justify-content: center; }
   .checkers-game-head { align-items: stretch; flex-direction: column; }
