@@ -2116,8 +2116,8 @@ blockquote {
 .course-stage { min-height: 520px; padding: clamp(24px, 4vw, 48px); }
 .course-stage h3, .checkers-lesson h3, .checkers-setup h3, .checkers-game h3 { margin: 10px 0 16px; font-family: Georgia, serif; font-size: clamp(30px, 4vw, 46px); line-height: 1.06; }
 .foundation-layout, .coordinate-quiz { display: grid; grid-template-columns: minmax(0, .85fr) minmax(360px, 1fr); align-items: center; gap: clamp(28px, 6vw, 80px); }
-.foundation-board { width: min(100%, 560px); aspect-ratio: 1; display: grid; grid-template-columns: repeat(8, 1fr); overflow: hidden; border: 6px solid var(--fg); border-radius: 12px; box-shadow: 0 20px 48px rgb(12 27 20 / 14%); }
-.foundation-board > span { position: relative; display: grid; place-items: center; background: var(--board-light); color: var(--board-ink); }
+.foundation-board { width: min(100%, 560px); aspect-ratio: 1 / 1; container-type: inline-size; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); grid-template-rows: repeat(8, minmax(0, 1fr)); overflow: hidden; border: 6px solid var(--fg); border-radius: 12px; box-shadow: 0 20px 48px rgb(12 27 20 / 14%); }
+.foundation-board > span { position: relative; min-width: 0; min-height: 0; display: grid; place-items: center; overflow: hidden; background: var(--board-light); color: var(--board-ink); }
 .foundation-board > span.dark { background: var(--board-dark); }
 .foundation-board b { font-size: clamp(32px, 8cqw, 72px); line-height: 1; }
 .foundation-board small { position: absolute; right: 4px; bottom: 2px; font-weight: 900; }
