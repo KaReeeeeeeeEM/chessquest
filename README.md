@@ -97,6 +97,9 @@ ChessQuest is local-first:
 - No account is required for the current release.
 - Creating a Club Room challenge contacts Lichess and opens the game in the user’s browser; no book text is sent.
 - Desktop updates are checked automatically on launch and can also be checked from the sidebar. Available versions open in a responsive modal with signed-package download progress, automatic installation, and application restart.
+- The required chess foundations course teaches board orientation, piece names, movement patterns, and square recognition through randomized unlabelled-board quizzes.
+- Checkers includes a sourced ten-module course and offline play for English/American, International, Brazilian, and Russian rules, with explicit pre-game rule cards and four computer levels.
+- Chess board appearance is independently configurable with Classic sage, Walnut club, Ocean slate, and Midnight tournament palettes.
 
 Removing the application does not necessarily clear WebView application data. Use the application’s controls before uninstalling when data removal is important.
 
@@ -108,6 +111,7 @@ Removing the application does not necessarily clear WebView application data. Us
 | Interface | React 19 + TypeScript | Typed application state and UI |
 | Build | Vite | Development and production bundling |
 | Chess | chess.js | Legal moves, board state, and game rules |
+| Checkers | ChessQuest rules engine | Variant-aware legal moves, compulsory captures, promotion, and offline minimax opponent |
 | EPUB | JSZip + browser XML APIs | Local EPUB extraction and parsing |
 | Components | shadcn foundations + Base UI | Accessible dialogs, selects, and inputs |
 | Storage | localStorage | Offline preferences, progress, and history |
@@ -119,6 +123,8 @@ Removing the application does not necessarily clear WebView application data. Us
 src/
   components/ui/       Shared accessible interface primitives
   features/game/       Computer play, review, and analysis
+  features/checkers/   Checkers rules, computer opponent, course, and play UI
+  features/courses/    Required chess foundations and coordinate training
   features/library/    EPUB importing and parsing
   features/reading/    Real progress and streak calculations
   features/tips/       365-day tip system

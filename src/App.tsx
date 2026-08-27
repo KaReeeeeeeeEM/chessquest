@@ -3,12 +3,14 @@ import { flushSync } from "react-dom";
 import { PageFlip } from "page-flip";
 import {
   ArrowLeft,
+  BookOpen,
   BookPlus,
   CalendarDays,
   Check,
   ChevronLeft,
   ChevronRight,
   CircleHelp,
+  CircleDot,
   Copy,
   ExternalLink,
   Flame,
@@ -30,6 +32,8 @@ import { Chess, type Square } from "chess.js";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ComputerGame } from "./features/game/ComputerGame";
+import { Checkers } from "./features/checkers/Checkers";
+import { ChessFoundations } from "./features/courses/ChessFoundations";
 import { GameReview } from "./features/game/GameReview";
 import { type Difficulty } from "./features/game/engine";
 import { loadGames, type SavedGame } from "./features/game/review";
@@ -63,11 +67,13 @@ type View =
   | "settings"
   | "widgets"
   | "reader"
-  | "games";
+  | "games"
+  | "checkers";
 type Theme = "light" | "dark";
 type FontChoice = "nunito" | "geist" | "serif" | "system" | "verdana" | "mono";
 type FontSizeChoice = "compact" | "comfortable" | "large";
 type ColorChoice = "forest" | "ocean" | "plum" | "ember";
+type BoardChoice = "classic" | "walnut" | "ocean" | "midnight";
 type SoundStyle = "classic" | "soft" | "silent";
 const lessonFen =
   "rnbqkbnr/pppp1ppp/8/4p3/8/5N2/PPPPPPPP/RNBQKB1R w KQkq - 0 2";
@@ -464,10 +470,6 @@ export default function App() {
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem("cq-theme") as Theme) || "light",
   );
-  const [complete, setComplete] = useState(
-    () => localStorage.getItem("cq-lesson-1") === "done",
-  );
-  const [hint, setHint] = useState(0);
   const [importedBooks, setImportedBooks] =
     useState<ImportedBook[]>(loadImportedBooks);
   const [readingProgress, setReadingProgress] =
@@ -486,6 +488,7 @@ export default function App() {
   const [colorChoice, setColorChoice] = useState<ColorChoice>(
     () => (localStorage.getItem("cq-color") as ColorChoice) || "forest",
   );
+  const [boardChoice, setBoardChoice] = useState<BoardChoice>(() => (localStorage.getItem("cq-board") as BoardChoice) || "classic");
   const [soundStyle, setSoundStyle] = useState<SoundStyle>(
     () => (localStorage.getItem("cq-sounds") as SoundStyle) || "classic",
   );
@@ -510,12 +513,14 @@ export default function App() {
     document.documentElement.dataset.font = fontChoice;
     document.documentElement.dataset.fontSize = fontSizeChoice;
     document.documentElement.dataset.color = colorChoice;
+    document.documentElement.dataset.board = boardChoice;
     localStorage.setItem("cq-font", fontChoice);
     localStorage.setItem("cq-font-size", fontSizeChoice);
     localStorage.setItem("cq-color", colorChoice);
+    localStorage.setItem("cq-board", boardChoice);
     localStorage.setItem("cq-username", username);
     localStorage.setItem("cq-sounds", soundStyle);
-  }, [colorChoice, fontChoice, fontSizeChoice, soundStyle, username]);
+  }, [boardChoice, colorChoice, fontChoice, fontSizeChoice, soundStyle, username]);
   useEffect(() => {
     localStorage.setItem(
       "cq-sidebar",
@@ -560,10 +565,6 @@ export default function App() {
     const timer = window.setInterval(check, 60_000);
     return () => window.clearInterval(timer);
   }, [readingProgress.pagesByDate, reminderTime, remindersEnabled, username]);
-  function finish() {
-    setComplete(true);
-    localStorage.setItem("cq-lesson-1", "done");
-  }
   const titles: Record<View, string> = {
     home: "Today",
     lesson: "Guided lesson",
@@ -575,6 +576,7 @@ export default function App() {
     reader: "Reading",
     games: "Play computer",
     widgets: "Widgets",
+    checkers: "Checkers",
   };
   const selectedBook = importedBooks.find((book) => book.id === selectedBookId);
   const pagesToday = readingProgress.pagesByDate[localDateKey()] || 0;
@@ -723,6 +725,8 @@ export default function App() {
             icon={<Gamepad2 />}
             label="Play computer"
           />
+          <Nav active={view === "lesson"} onClick={() => setView("lesson")} icon={<BookOpen />} label="Chess course" />
+          <Nav active={view === "checkers"} onClick={() => setView("checkers")} icon={<CircleDot />} label="Checkers" />
           <Nav
             active={view === "club"}
             onClick={() => setView("club")}
@@ -788,19 +792,11 @@ export default function App() {
             onRead={openBook}
             onImport={() => setView("import")}
             widgetChoice={widgetChoice}
+            onCourse={() => setView("lesson")}
           />
         )}{" "}
-        {view === "lesson" && (
-          <Lesson
-            complete={complete}
-            hint={hint}
-            onHint={() => setHint((v) => Math.min(2, v + 1))}
-            onSuccess={finish}
-            onExit={() => setView("home")}
-            soundStyle={soundStyle}
-            username={username}
-          />
-        )}{" "}
+        {view === "lesson" && <ChessFoundations />}{" "}
+        {view === "checkers" && <Checkers />}{" "}
         {view === "library" && (
           <LibraryView
             onRead={openBook}
@@ -835,6 +831,8 @@ export default function App() {
             onFontSizeChange={setFontSizeChoice}
             colorChoice={colorChoice}
             onColorChange={setColorChoice}
+            boardChoice={boardChoice}
+            onBoardChange={setBoardChoice}
             soundStyle={soundStyle}
             onSoundChange={setSoundStyle}
             remindersEnabled={remindersEnabled}
@@ -890,6 +888,8 @@ function SettingsView({
   onFontSizeChange,
   colorChoice,
   onColorChange,
+  boardChoice,
+  onBoardChange,
   soundStyle,
   onSoundChange,
   remindersEnabled,
@@ -911,6 +911,8 @@ function SettingsView({
   onFontSizeChange: (value: FontSizeChoice) => void;
   colorChoice: ColorChoice;
   onColorChange: (value: ColorChoice) => void;
+  boardChoice: BoardChoice;
+  onBoardChange: (value: BoardChoice) => void;
   soundStyle: SoundStyle;
   onSoundChange: (value: SoundStyle) => void;
   remindersEnabled: boolean;
@@ -968,6 +970,10 @@ function SettingsView({
             <small>Changes primary actions and highlights.</small>
           </div>
           <Select value={colorChoice} onValueChange={(value) => onColorChange(value as ColorChoice)}><SelectTrigger id="color-choice" className="setting-control"><SelectValue>{colorChoice[0].toUpperCase() + colorChoice.slice(1)}</SelectValue></SelectTrigger><SelectContent><SelectGroup><SelectItem value="forest">Forest</SelectItem><SelectItem value="ocean">Ocean</SelectItem><SelectItem value="plum">Plum</SelectItem><SelectItem value="ember">Ember</SelectItem></SelectGroup></SelectContent></Select>
+        </div>
+        <div className="setting-row">
+          <div><label htmlFor="board-choice"><strong>Chess board style</strong></label><small>Changes every playable, review, and lesson board.</small></div>
+          <div className="board-choice-control"><span className={`board-swatch board-swatch--${boardChoice}`} aria-hidden="true"/><Select value={boardChoice} onValueChange={(value) => onBoardChange(value as BoardChoice)}><SelectTrigger id="board-choice" className="setting-control"><SelectValue>{({ classic: "Classic sage", walnut: "Walnut club", ocean: "Ocean slate", midnight: "Midnight tournament" } as Record<BoardChoice, string>)[boardChoice]}</SelectValue></SelectTrigger><SelectContent><SelectGroup><SelectItem value="classic">Classic sage</SelectItem><SelectItem value="walnut">Walnut club</SelectItem><SelectItem value="ocean">Ocean slate</SelectItem><SelectItem value="midnight">Midnight tournament</SelectItem></SelectGroup></SelectContent></Select></div>
         </div>
         <div className="setting-row">
           <div>
@@ -1051,12 +1057,14 @@ function Home({
   onRead,
   onImport,
   widgetChoice,
+  onCourse,
 }: {
   books: ImportedBook[];
   progress: ReadingProgress;
   onRead: (book: ImportedBook) => void;
   onImport: () => void;
   widgetChoice: string;
+  onCourse: () => void;
 }) {
   const activeBook =
     books.find((book) => book.id === progress.lastBookId) || books[0];
@@ -1127,6 +1135,7 @@ function Home({
         </div>
       </section>
       <aside className="side-stack">
+        {localStorage.getItem("cq-chess-foundations-coordinate") !== "passed" && <section className="foundation-start card compact"><span className="eyebrow">Start here</span><BookOpen/><h3>Learn the board first</h3><p>Name the pieces, understand movement, then prove you can read an unlabelled square.</p><Button onClick={onCourse}>Begin chess foundations</Button></section>}
         <section className="card compact">
           <span className="eyebrow">Read today</span>
           <div className="metric">
@@ -1296,6 +1305,7 @@ function Lesson({
     </div>
   );
 }
+void Lesson;
 function LibraryView({
   onRead,
   onImport,
