@@ -86,7 +86,7 @@ const glyph: Record<string, string> = {
   bk: "♚",
 };
 
-type ChessSound = "move" | "capture" | "check" | "checkmate";
+type ChessSound = "move" | "capture" | "check" | "checkmate" | "win";
 
 function playChessSound(kind: ChessSound, style: SoundStyle = "classic") {
   if (style === "silent") return;
@@ -96,42 +96,67 @@ function playChessSound(kind: ChessSound, style: SoundStyle = "classic") {
   } catch {
     return;
   }
-  const tones: Record<ChessSound, Array<[number, number, number]>> = {
-    move: [[190, 0, 0.07]],
-    capture: [
-      [145, 0, 0.09],
-      [105, 0.055, 0.12],
-    ],
-    check: [
-      [440, 0, 0.09],
-      [660, 0.09, 0.15],
-    ],
-    checkmate: [
-      [523, 0, 0.12],
-      [392, 0.12, 0.15],
-      [262, 0.27, 0.28],
-    ],
-  };
+  const master = context.createGain();
+  const compressor = context.createDynamicsCompressor();
+  master.gain.value = style === "soft" ? 0.52 : 0.78;
+  master.connect(compressor).connect(context.destination);
 
-  tones[kind].forEach(([frequency, delay, duration]) => {
+  function tone(frequency: number, delay: number, duration: number, volume: number, type: OscillatorType = "sine") {
     const oscillator = context.createOscillator();
     const gain = context.createGain();
     const start = context.currentTime + delay;
-    oscillator.type =
-      style === "soft" ? "sine" : kind === "capture" ? "square" : "sine";
-    oscillator.frequency.setValueAtTime(
-      style === "soft" ? frequency * 0.82 : frequency,
-      start,
-    );
+    oscillator.type = style === "soft" ? "sine" : type;
+    oscillator.frequency.setValueAtTime(style === "soft" ? frequency * 0.9 : frequency, start);
     gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.exponentialRampToValueAtTime(0.12, start + 0.008);
+    gain.gain.exponentialRampToValueAtTime(volume, start + 0.008);
     gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-    oscillator.connect(gain).connect(context.destination);
+    oscillator.connect(gain).connect(master);
     oscillator.start(start);
     oscillator.stop(start + duration);
-  });
+  }
 
-  window.setTimeout(() => void context.close(), 700);
+  function woodenStrike(delay: number, duration: number, volume: number, pitch: number) {
+    const length = Math.ceil(context.sampleRate * duration);
+    const buffer = context.createBuffer(1, length, context.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let index = 0; index < length; index += 1) data[index] = (Math.random() * 2 - 1) * Math.exp(-index / (context.sampleRate * duration * 0.16));
+    const source = context.createBufferSource();
+    const filter = context.createBiquadFilter();
+    const gain = context.createGain();
+    const start = context.currentTime + delay;
+    source.buffer = buffer;
+    filter.type = "bandpass";
+    filter.frequency.value = pitch;
+    filter.Q.value = 0.8;
+    gain.gain.setValueAtTime(volume, start);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    source.connect(filter).connect(gain).connect(master);
+    source.start(start);
+  }
+
+  if (kind === "move") {
+    woodenStrike(0, 0.085, 0.42, 720);
+    tone(118, 0, 0.07, 0.055, "triangle");
+  } else if (kind === "capture") {
+    woodenStrike(0, 0.12, 0.55, 540);
+    woodenStrike(0.055, 0.14, 0.42, 330);
+    tone(92, 0.025, 0.17, 0.075, "triangle");
+  } else if (kind === "check") {
+    tone(659, 0, 0.16, 0.09, "triangle");
+    tone(988, 0.095, 0.26, 0.105, "sine");
+  } else if (kind === "checkmate") {
+    woodenStrike(0, 0.13, 0.5, 420);
+    tone(523, 0.03, 0.2, 0.09, "triangle");
+    tone(392, 0.18, 0.25, 0.1, "triangle");
+    tone(196, 0.36, 0.48, 0.13, "sine");
+  } else {
+    [[523, 0], [659, 0.1], [784, 0.2], [1047, 0.31], [1319, 0.43]].forEach(([frequency, delay], index) => {
+      tone(frequency, delay, index === 4 ? 0.55 : 0.24, index === 4 ? 0.13 : 0.09, index % 2 ? "triangle" : "sine");
+    });
+    tone(262, 0, 0.72, 0.06, "sine");
+  }
+
+  window.setTimeout(() => void context.close(), kind === "win" ? 1400 : 1000);
 }
 
 function playStreakCelebration(style: SoundStyle) {

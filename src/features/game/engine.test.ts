@@ -28,4 +28,28 @@ describe("local chess engine", () => {
     const reply = chooseComputerMove(game, "club", [], ["e4"]);
     expect(["e5", "c5", "c6", "e6"]).toContain(reply?.san);
   });
+
+  it("always takes an available checkmate even at beginner difficulty", () => {
+    const game = new Chess("7k/8/5KQ1/8/8/8/8/8 w - - 0 1");
+    const move = chooseComputerMove(game, "beginner");
+    expect(move).toBeDefined();
+    game.move(move!);
+    expect(game.isCheckmate()).toBe(true);
+  });
+
+  it("rewards driving the losing king toward the edge in simple endgames", () => {
+    const centralKing = new Chess("8/8/8/3k4/8/8/4Q3/4K3 w - - 0 1");
+    const edgeKing = new Chess("k7/8/8/8/8/8/4Q3/4K3 w - - 0 1");
+    expect(evaluatePosition(edgeKing)).toBeGreaterThan(evaluatePosition(centralKing));
+  });
+
+  it("converts a decisive computer endgame instead of drifting to a draw", () => {
+    const game = new Chess("7k/8/8/8/8/8/4Q3/4K3 w - - 0 1");
+    for (let ply = 0; ply < 80 && !game.isGameOver(); ply += 1) {
+      const move = chooseComputerMove(game, "beginner");
+      expect(move).toBeDefined();
+      game.move(move!);
+    }
+    expect(game.isCheckmate()).toBe(true);
+  });
 });

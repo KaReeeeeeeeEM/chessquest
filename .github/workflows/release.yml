@@ -78,9 +78,9 @@ jobs:
           tagName: v__VERSION__
           releaseName: ChessQuest __VERSION__
           releaseBody: |
-            ChessQuest 0.7.1 gives the computer substantially longer, variable, game-speed-aware thinking pauses so replies feel considered instead of preloaded.
+            ChessQuest 0.8.0 improves computer-vs-computer endgames with mate-first move selection, deeper low-material search, king-confinement scoring, and deterministic conversion once a decisive advantage reaches the endgame.
 
-            Active matches now focus on the board without the Coach Rook side panel. Widget registration failures include clear, platform-specific recovery steps for macOS, Android, Windows, and Linux.
+            Chess audio has been rebuilt with original offline sound design: wooden move and capture transients, distinct check and checkmate cues, and a rising celebratory flourish when the player wins.
 
             Choose the installer for your operating system from the assets below.
           releaseDraft: true

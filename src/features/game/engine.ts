@@ -11,6 +11,15 @@ const PIECE_VALUE: Record<string, number> = {
   k: 0,
 };
 
+function squareDistance(a: string, b: string) {
+  return Math.abs(a.charCodeAt(0) - b.charCodeAt(0)) + Math.abs(Number(a[1]) - Number(b[1]));
+}
+
+function kingSquare(game: Chess, color: "w" | "b") {
+  for (const rank of game.board()) for (const piece of rank) if (piece?.type === "k" && piece.color === color) return piece.square;
+  return color === "w" ? "e1" : "e8";
+}
+
 // Compact offline repertoire derived from established master opening families.
 const OPENING_LINES = [
   ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6"],
@@ -52,7 +61,17 @@ export function evaluatePosition(game: Chess) {
     const white = index < 4;
     return score + (stayedHome ? 0 : white ? 12 : -12);
   }, 0);
-  return material + centre + developed;
+  const pieces = game.board().flat().filter(Boolean);
+  const whiteKing = kingSquare(game, "w");
+  const blackKing = kingSquare(game, "b");
+  const blackEdgeDistance = Math.min(blackKing.charCodeAt(0) - 97, 104 - blackKing.charCodeAt(0), Number(blackKing[1]) - 1, 8 - Number(blackKing[1]));
+  const whiteEdgeDistance = Math.min(whiteKing.charCodeAt(0) - 97, 104 - whiteKing.charCodeAt(0), Number(whiteKing[1]) - 1, 8 - Number(whiteKing[1]));
+  const winningSide = material > 250 ? 1 : material < -250 ? -1 : 0;
+  const kingConversion = pieces.length <= 10 && winningSide
+    ? winningSide * ((3 - (winningSide > 0 ? blackEdgeDistance : whiteEdgeDistance)) * 45 + (14 - squareDistance(whiteKing, blackKing)) * 12)
+    : 0;
+  const checkPressure = game.isCheck() ? (game.turn() === "b" ? 70 : -70) : 0;
+  return material + centre + developed + kingConversion + checkPressure;
 }
 
 export function computerThinkDelay(
@@ -90,7 +109,8 @@ function search(game: Chess, depth: number, alpha: number, beta: number): number
 export function chooseComputerMove(game: Chess, difficulty: Difficulty, avoidPositions: string[] = [], history: string[] = []) {
   const bookMove = openingBookMove(game, history);
   if (bookMove) return game.moves({ verbose: true }).find((move) => move.san === bookMove);
-  const depth = difficulty === "expert" ? 3 : difficulty === "club" ? 2 : 1;
+  const pieceCount = game.board().flat().filter(Boolean).length;
+  const depth = pieceCount <= 10 ? 3 : difficulty === "expert" ? 3 : difficulty === "club" ? 2 : 1;
   const maximizing = game.turn() === "w";
   const normalizedAvoid = new Set(avoidPositions.map((fen) => fen.split(" ").slice(0, 4).join(" ")));
   const scored = game.moves({ verbose: true }).map((move) => {
@@ -101,8 +121,11 @@ export function chooseComputerMove(game: Chess, difficulty: Difficulty, avoidPos
     return { move, score };
   });
   scored.sort((a, b) => maximizing ? b.score - a.score : a.score - b.score);
-  const pool =
-    difficulty === "beginner"
+  const matingMove = scored.find(({ score }) => maximizing ? score >= 90000 : score <= -90000);
+  if (matingMove) return matingMove.move;
+  const pool = pieceCount <= 10
+    ? scored.slice(0, 1)
+    : difficulty === "beginner"
       ? scored.slice(0, Math.min(6, scored.length))
       : difficulty === "casual"
         ? scored.slice(0, Math.min(4, scored.length))

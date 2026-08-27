@@ -28,7 +28,7 @@ type Props = {
   name: string;
   recommended: Difficulty;
   sounds: boolean;
-  onSound: (kind: "move" | "capture" | "check" | "checkmate") => void;
+  onSound: (kind: "move" | "capture" | "check" | "checkmate" | "win") => void;
   onGameSaved?: (games: SavedGame[]) => void;
   onReviewRequested?: () => void;
 };
@@ -74,18 +74,21 @@ export function ComputerGame({ name, recommended, sounds, onSound, onGameSaved, 
         });
       else
         setBlackTime((value) => {
-          if (value <= 1) setFinished(`${name} wins on time.`);
+          if (value <= 1) {
+            setFinished(`${name} wins on time.`);
+            if (sounds && mode !== "watch") onSound("win");
+          }
           return Math.max(0, value - 1);
         });
     }, 1000);
     return () => window.clearInterval(timer);
-  }, [finished, game, name, started, thinking]);
+  }, [finished, game, mode, name, onSound, sounds, started, thinking]);
 
   function soundFor(move: Move, position: Chess) {
     if (!sounds) return;
     onSound(
       position.isCheckmate()
-        ? "checkmate"
+        ? move.color === "w" && mode !== "watch" ? "win" : "checkmate"
         : position.isCheck()
           ? "check"
           : move.captured
